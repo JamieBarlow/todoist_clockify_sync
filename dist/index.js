@@ -41,8 +41,10 @@ logProjects();
 function getActiveTasks() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const tasks = yield todoist.getTasks();
-            console.log(tasks.results[0]);
+            const tasks = yield todoist.getTasks({ filter: "today" });
+            console.log(`Number of tasks total: ${tasks.results.length}`);
+            console.log(tasks);
+            return tasks;
         }
         catch (error) {
             console.log(error);
