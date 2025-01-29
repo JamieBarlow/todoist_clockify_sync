@@ -10,7 +10,30 @@ if (!TODOIST_API_KEY) {
 }
 const todoist = new TodoistApi(TODOIST_API_KEY);
 
-todoist
-  .getProjects()
-  .then((projects) => console.log(projects))
-  .catch((error) => console.log(error));
+async function getAllProjects() {
+  try {
+    const projects = await todoist.getProjects();
+    return projects;
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+async function logProjects() {
+  const projects = await getAllProjects();
+  const results = projects?.results;
+  for (const project of results!) {
+    console.log(project.id);
+  }
+}
+logProjects();
+
+async function getActiveTasks() {
+  try {
+    const tasks = await todoist.getTasks();
+    console.log(tasks.results);
+  } catch (error) {
+    console.log(error);
+  }
+}
+getActiveTasks();
