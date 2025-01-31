@@ -12,13 +12,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 require("dotenv/config");
 require("colors");
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY;
-const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 const todoist_api_typescript_1 = require("@doist/todoist-api-typescript");
 if (!TODOIST_API_KEY) {
     throw new Error("Missing TODOIST_API_KEY in environment variables");
-}
-if (!CLOCKIFY_API_KEY) {
-    throw new Error("Missing CLOCKIFY_API_KEY in environment variables");
 }
 const todoist = new todoist_api_typescript_1.TodoistApi(TODOIST_API_KEY);
 class TodoistProjectManager {
@@ -79,57 +75,15 @@ class TodoistTaskManager {
         this.tasks.forEach((task) => console.log(`${task.content}`.blue));
     }
 }
-class ClockifyManager {
-    fetchClockifyWorkspaces() {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const headers = {
-                    "x-api-key": `${CLOCKIFY_API_KEY}`,
-                    "Content-Type": "application/json",
-                };
-                const response = yield fetch("https://api.clockify.me/api/v1/workspaces", {
-                    method: "GET",
-                    headers: headers,
-                });
-                if (!response.ok) {
-                    throw new Error(`Failed to fetch workspaces: ${response.statusText}`.red);
-                }
-                const workspaces = yield response.json();
-                workspaces.forEach((workspace) => {
-                    console.log(`Workspace name: ${workspace.name}. Workspace ID: ${workspace.id}`
-                        .bgMagenta);
-                });
-                this.workspaces = workspaces;
-                return workspaces;
-            }
-            catch (error) {
-                console.error(error);
-            }
-            return [];
-        });
-    }
-    getWorkspaceId() {
-        if (this.workspaces) {
-            return this.workspaces[0].id;
-        }
-        return this.workspaces;
-    }
-}
+// Runs script
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
-        const clockifyManager = new ClockifyManager();
-        yield clockifyManager.fetchClockifyWorkspaces();
-        console.log(`${clockifyManager.getWorkspaceId()}`.bgWhite);
+        const todoistTaskManager = new TodoistTaskManager();
+        yield todoistTaskManager.fetchTasks();
+        todoistTaskManager.logTasks();
+        const todoistProjects = new TodoistProjectManager();
+        todoistProjects.fetchProjects();
+        todoistProjects.logProjects();
     });
 }
 main();
-// // Runs script
-// async function main() {
-//   const todoistTaskManager = new TodoistTaskManager();
-//   await todoistTaskManager.fetchTasks();
-//   todoistTaskManager.logTasks();
-//   const todoistProjects = new TodoistProjectManager();
-//   todoistProjects.fetchProjects();
-//   todoistProjects.logProjects();
-// }
-// main();

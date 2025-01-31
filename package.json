@@ -10,6 +10,7 @@
   },
   "scripts": {
     "build": "npx tsc",
-    "start": "npm run build && node dist/index.js"
+    "start-todoist": "npm run build && node dist/todoist.js",
+    "start-clockify": "npm run build && node dist/clockify.js"
   }
 }

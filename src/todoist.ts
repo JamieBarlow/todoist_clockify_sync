@@ -2,7 +2,6 @@ import "dotenv/config";
 import "colors";
 
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY;
-const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 
 import {
   GetProjectsResponse,
