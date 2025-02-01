@@ -18,18 +18,43 @@ interface ClockifyWorkspace {
 }
 type GetWorkspacesResponse = ClockifyWorkspace[];
 
+interface TimeEntry {
+  billable: boolean;
+  customAttributes?: [
+    {
+      name: string;
+      namespace: string;
+      value: string;
+    }
+  ];
+  customFields?: [
+    {
+      customFieldId: string;
+      sourceType: string;
+      value: string;
+    }
+  ];
+  description: string;
+  end: string;
+  projectId?: string;
+  start: string;
+  tagIds?: string[];
+  taskId?: string;
+  type: "REGULAR" | "BREAK";
+}
+
 if (!CLOCKIFY_API_KEY) {
   throw new Error("Missing CLOCKIFY_API_KEY in environment variables");
 }
+const headers: HeadersInit = {
+  "x-api-key": `${CLOCKIFY_API_KEY}`,
+  "Content-Type": "application/json",
+};
 
 class ClockifyManager {
   private workspaces: GetWorkspacesResponse | undefined;
   async fetchClockifyWorkspaces(): Promise<GetWorkspacesResponse> {
     try {
-      const headers: HeadersInit = {
-        "x-api-key": `${CLOCKIFY_API_KEY}`,
-        "Content-Type": "application/json",
-      };
       const response = await fetch(
         "https://api.clockify.me/api/v1/workspaces",
         {
@@ -62,11 +87,41 @@ class ClockifyManager {
     }
     return this.workspaces;
   }
+  async addTimeEntry(id: string): Promise<void> {
+    const payload: TimeEntry = {
+      billable: false,
+      description: "This is a sample time entry description",
+      start: "2025-02-01T09:00:00Z",
+      end: "2025-02-01T10:00:00Z",
+      type: "REGULAR",
+    };
+    try {
+      const response = await fetch(
+        `https://api.clockify.me/api/v1/workspaces/${id}/time-entries`,
+        {
+          method: "POST",
+          headers: headers,
+          body: JSON.stringify(payload),
+        }
+      );
+      // catch HTTP errors
+      if (!response.ok) {
+        console.error(`Failed to add time entries: ${response.statusText}`.red);
+        return;
+      }
+      // catch async errors
+    } catch (error) {
+      console.error(`Error adding time entries: ${error}`.red);
+    }
+  }
 }
 
 async function main() {
   const clockifyManager = new ClockifyManager();
   await clockifyManager.fetchClockifyWorkspaces();
-  console.log(`${clockifyManager.getWorkspaceId()}`.bgWhite);
+  const workspaceId = await clockifyManager.getWorkspaceId();
+  if (workspaceId) {
+    clockifyManager.addTimeEntry(workspaceId);
+  }
 }
 main();

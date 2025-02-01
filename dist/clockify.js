@@ -15,14 +15,14 @@ const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 if (!CLOCKIFY_API_KEY) {
     throw new Error("Missing CLOCKIFY_API_KEY in environment variables");
 }
+const headers = {
+    "x-api-key": `${CLOCKIFY_API_KEY}`,
+    "Content-Type": "application/json",
+};
 class ClockifyManager {
     fetchClockifyWorkspaces() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const headers = {
-                    "x-api-key": `${CLOCKIFY_API_KEY}`,
-                    "Content-Type": "application/json",
-                };
                 const response = yield fetch("https://api.clockify.me/api/v1/workspaces", {
                     method: "GET",
                     headers: headers,
@@ -50,12 +50,42 @@ class ClockifyManager {
         }
         return this.workspaces;
     }
+    addTimeEntry(id) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const payload = {
+                billable: false,
+                description: "This is a sample time entry description",
+                start: "2025-02-01T09:00:00Z",
+                end: "2025-02-01T10:00:00Z",
+                type: "REGULAR",
+            };
+            try {
+                const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${id}/time-entries`, {
+                    method: "POST",
+                    headers: headers,
+                    body: JSON.stringify(payload),
+                });
+                // catch HTTP errors
+                if (!response.ok) {
+                    console.error(`Failed to add time entries: ${response.statusText}`.red);
+                    return;
+                }
+                // catch async errors
+            }
+            catch (error) {
+                console.error(`Error adding time entries: ${error}`.red);
+            }
+        });
+    }
 }
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const clockifyManager = new ClockifyManager();
         yield clockifyManager.fetchClockifyWorkspaces();
-        console.log(`${clockifyManager.getWorkspaceId()}`.bgWhite);
+        const workspaceId = yield clockifyManager.getWorkspaceId();
+        if (workspaceId) {
+            clockifyManager.addTimeEntry(workspaceId);
+        }
     });
 }
 main();
