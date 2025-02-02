@@ -11,6 +11,7 @@ import {
   Project,
 } from "@doist/todoist-api-typescript";
 import { TimeEntry, ClockifyManager } from "./clockify";
+import { time } from "console";
 
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
@@ -69,14 +70,31 @@ class TodoistTaskManager {
     console.log(`Tasks due today: ${this.tasks.length}`.green);
     this.tasks.forEach((task) => console.log(`${task.content}`.blue));
   }
+
+  // Calculates start and end times from the Todoist task's datetime value. Allows for conversion to Clockify tasks
+  getTaskTiming(task: Task) {
+    const duration = task.duration?.amount;
+    const startTime = new Date(`${task.due?.datetime}`).toISOString();
+    const endTime = new Date(startTime);
+    if (duration) {
+      endTime.setMinutes(endTime.getMinutes() + duration);
+    }
+    const endTimeStr = endTime.toISOString();
+    return {
+      startTime: startTime,
+      endTime: endTimeStr,
+    };
+  }
+
   formatTasksForClockify() {
     const timeEntries: TimeEntry[] = [];
     this.tasks.forEach((task) => {
+      const { startTime, endTime } = this.getTaskTiming(task);
       timeEntries.push({
         billable: false,
-        description: task.description,
-        start: `${task.due?.datetime}Z` || "",
-        end: `${task.due?.datetime}Z` || "",
+        description: task.content,
+        start: startTime,
+        end: endTime,
         type: "REGULAR",
       });
     });
@@ -99,6 +117,7 @@ async function main() {
       clockifyManager.addTimeEntry(workspaceId, timeEntry);
     }
   }
+
   // const todoistProjects = new TodoistProjectManager();
   // todoistProjects.fetchProjects();
   // todoistProjects.logProjects();

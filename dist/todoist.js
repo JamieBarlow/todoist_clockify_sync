@@ -77,15 +77,30 @@ class TodoistTaskManager {
         console.log(`Tasks due today: ${this.tasks.length}`.green);
         this.tasks.forEach((task) => console.log(`${task.content}`.blue));
     }
+    // Calculates start and end times from the Todoist task's datetime value. Allows for conversion to Clockify tasks
+    getTaskTiming(task) {
+        var _a, _b;
+        const duration = (_a = task.duration) === null || _a === void 0 ? void 0 : _a.amount;
+        const startTime = new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`).toISOString();
+        const endTime = new Date(startTime);
+        if (duration) {
+            endTime.setMinutes(endTime.getMinutes() + duration);
+        }
+        const endTimeStr = endTime.toISOString();
+        return {
+            startTime: startTime,
+            endTime: endTimeStr,
+        };
+    }
     formatTasksForClockify() {
         const timeEntries = [];
         this.tasks.forEach((task) => {
-            var _a, _b;
+            const { startTime, endTime } = this.getTaskTiming(task);
             timeEntries.push({
                 billable: false,
-                description: task.description,
-                start: `${(_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime}Z` || "",
-                end: `${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}Z` || "",
+                description: task.content,
+                start: startTime,
+                end: endTime,
                 type: "REGULAR",
             });
         });

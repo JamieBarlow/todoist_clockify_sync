@@ -108,8 +108,9 @@ export class ClockifyManager {
       // catch HTTP errors
       if (!response.ok) {
         console.error(
-          `Failed to add time entry: ${response.statusText}, payload: ${payload}`
-            .red
+          `Failed to add time entry: ${
+            response.statusText
+          }, payload: ${JSON.stringify(payload, null, 2)}`.red
         );
         return;
       }
