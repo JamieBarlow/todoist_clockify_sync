@@ -74,6 +74,21 @@ class TodoistTaskManager {
         console.log(`Tasks due today: ${this.tasks.length}`.green);
         this.tasks.forEach((task) => console.log(`${task.content}`.blue));
     }
+    formatTasksForClockify() {
+        const timeEntries = [];
+        this.tasks.forEach((task) => {
+            var _a, _b;
+            timeEntries.push({
+                billable: false,
+                description: task.description,
+                start: ((_a = task.due) === null || _a === void 0 ? void 0 : _a.string) || "",
+                end: ((_b = task.due) === null || _b === void 0 ? void 0 : _b.string) || "",
+                type: "REGULAR",
+            });
+        });
+        console.log(`${JSON.stringify(timeEntries, null, 2)}`.bgCyan);
+    }
+    formatDates() { }
 }
 // Runs script
 function main() {
@@ -81,9 +96,10 @@ function main() {
         const todoistTaskManager = new TodoistTaskManager();
         yield todoistTaskManager.fetchTasks();
         todoistTaskManager.logTasks();
-        const todoistProjects = new TodoistProjectManager();
-        todoistProjects.fetchProjects();
-        todoistProjects.logProjects();
+        todoistTaskManager.formatTasksForClockify();
+        // const todoistProjects = new TodoistProjectManager();
+        // todoistProjects.fetchProjects();
+        // todoistProjects.logProjects();
     });
 }
 main();

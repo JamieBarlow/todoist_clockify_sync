@@ -6,9 +6,11 @@ const TODOIST_API_KEY = process.env.TODOIST_API_KEY;
 import {
   GetProjectsResponse,
   GetTasksResponse,
+  Task,
   TodoistApi,
   Project,
 } from "@doist/todoist-api-typescript";
+import { TimeEntry } from "./clockify";
 
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
@@ -46,7 +48,7 @@ class TodoistProjectManager {
 }
 
 class TodoistTaskManager {
-  private tasks: any[] = []; // encapsulated state
+  private tasks: Task[] = []; // encapsulated state
 
   async fetchTasks() {
     try {
@@ -65,6 +67,20 @@ class TodoistTaskManager {
     console.log(`Tasks due today: ${this.tasks.length}`.green);
     this.tasks.forEach((task) => console.log(`${task.content}`.blue));
   }
+  formatTasksForClockify() {
+    const timeEntries: TimeEntry[] = [];
+    this.tasks.forEach((task) => {
+      timeEntries.push({
+        billable: false,
+        description: task.description,
+        start: task.due?.string || "",
+        end: task.due?.string || "",
+        type: "REGULAR",
+      });
+    });
+    console.log(`${JSON.stringify(timeEntries, null, 2)}`.bgCyan);
+  }
+  formatDates() {}
 }
 
 // Runs script
@@ -72,8 +88,9 @@ async function main() {
   const todoistTaskManager = new TodoistTaskManager();
   await todoistTaskManager.fetchTasks();
   todoistTaskManager.logTasks();
-  const todoistProjects = new TodoistProjectManager();
-  todoistProjects.fetchProjects();
-  todoistProjects.logProjects();
+  todoistTaskManager.formatTasksForClockify();
+  // const todoistProjects = new TodoistProjectManager();
+  // todoistProjects.fetchProjects();
+  // todoistProjects.logProjects();
 }
 main();

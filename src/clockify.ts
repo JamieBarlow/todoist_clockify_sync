@@ -18,7 +18,7 @@ interface ClockifyWorkspace {
 }
 type GetWorkspacesResponse = ClockifyWorkspace[];
 
-interface TimeEntry {
+export interface TimeEntry {
   billable: boolean;
   customAttributes?: [
     {
