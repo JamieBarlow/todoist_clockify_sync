@@ -120,13 +120,3 @@ export class ClockifyManager {
     }
   }
 }
-
-async function main() {
-  const clockifyManager = new ClockifyManager();
-  await clockifyManager.fetchClockifyWorkspaces();
-  const workspaceId = await clockifyManager.getWorkspaceId();
-  // if (workspaceId) {
-  //   clockifyManager.addTimeEntry(workspaceId);
-  // }
-}
-main();

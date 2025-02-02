@@ -9,11 +9,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.TodoistTaskManager = exports.TodoistProjectManager = void 0;
 require("dotenv/config");
 require("colors");
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY;
 const todoist_api_typescript_1 = require("@doist/todoist-api-typescript");
-const clockify_1 = require("./clockify");
 if (!TODOIST_API_KEY) {
     throw new Error("Missing TODOIST_API_KEY in environment variables");
 }
@@ -52,6 +52,7 @@ class TodoistProjectManager {
         return this.projects;
     }
 }
+exports.TodoistProjectManager = TodoistProjectManager;
 class TodoistTaskManager {
     constructor() {
         this.tasks = []; // encapsulated state
@@ -108,24 +109,4 @@ class TodoistTaskManager {
         return timeEntries;
     }
 }
-// Runs script
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const todoistTaskManager = new TodoistTaskManager();
-        yield todoistTaskManager.fetchTasks();
-        todoistTaskManager.logTasks();
-        const timeEntries = yield todoistTaskManager.formatTasksForClockify();
-        const clockifyManager = new clockify_1.ClockifyManager();
-        yield clockifyManager.fetchClockifyWorkspaces();
-        const workspaceId = yield clockifyManager.getWorkspaceId();
-        if (workspaceId) {
-            for (const timeEntry of timeEntries) {
-                clockifyManager.addTimeEntry(workspaceId, timeEntry);
-            }
-        }
-        // const todoistProjects = new TodoistProjectManager();
-        // todoistProjects.fetchProjects();
-        // todoistProjects.logProjects();
-    });
-}
-main();
+exports.TodoistTaskManager = TodoistTaskManager;

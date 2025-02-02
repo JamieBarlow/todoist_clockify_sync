@@ -17,7 +17,7 @@ if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
 }
 const todoist = new TodoistApi(TODOIST_API_KEY);
-class TodoistProjectManager {
+export class TodoistProjectManager {
   private projects: Project[] = []; // Typed encapsulated state
 
   // Fetch all Todoist project objects
@@ -48,7 +48,7 @@ class TodoistProjectManager {
   }
 }
 
-class TodoistTaskManager {
+export class TodoistTaskManager {
   private tasks: Task[] = []; // encapsulated state
 
   async fetchTasks() {
@@ -102,24 +102,3 @@ class TodoistTaskManager {
     return timeEntries;
   }
 }
-
-// Runs script
-async function main() {
-  const todoistTaskManager = new TodoistTaskManager();
-  await todoistTaskManager.fetchTasks();
-  todoistTaskManager.logTasks();
-  const timeEntries = await todoistTaskManager.formatTasksForClockify();
-  const clockifyManager = new ClockifyManager();
-  await clockifyManager.fetchClockifyWorkspaces();
-  const workspaceId = await clockifyManager.getWorkspaceId();
-  if (workspaceId) {
-    for (const timeEntry of timeEntries) {
-      clockifyManager.addTimeEntry(workspaceId, timeEntry);
-    }
-  }
-
-  // const todoistProjects = new TodoistProjectManager();
-  // todoistProjects.fetchProjects();
-  // todoistProjects.logProjects();
-}
-main();

@@ -81,14 +81,3 @@ class ClockifyManager {
     }
 }
 exports.ClockifyManager = ClockifyManager;
-function main() {
-    return __awaiter(this, void 0, void 0, function* () {
-        const clockifyManager = new ClockifyManager();
-        yield clockifyManager.fetchClockifyWorkspaces();
-        const workspaceId = yield clockifyManager.getWorkspaceId();
-        // if (workspaceId) {
-        //   clockifyManager.addTimeEntry(workspaceId);
-        // }
-    });
-}
-main();
