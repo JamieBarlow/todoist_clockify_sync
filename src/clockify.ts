@@ -51,7 +51,7 @@ const headers: HeadersInit = {
   "Content-Type": "application/json",
 };
 
-class ClockifyManager {
+export class ClockifyManager {
   private workspaces: GetWorkspacesResponse | undefined;
   async fetchClockifyWorkspaces(): Promise<GetWorkspacesResponse> {
     try {
@@ -87,13 +87,14 @@ class ClockifyManager {
     }
     return this.workspaces;
   }
-  async addTimeEntry(id: string): Promise<void> {
+  async addTimeEntry(id: string, timeEntry: TimeEntry): Promise<void> {
+    const { billable, description, start, end, type } = timeEntry;
     const payload: TimeEntry = {
-      billable: false,
-      description: "This is a sample time entry description",
-      start: "2025-02-01T09:00:00Z",
-      end: "2025-02-01T10:00:00Z",
-      type: "REGULAR",
+      billable,
+      description,
+      start,
+      end,
+      type,
     };
     try {
       const response = await fetch(
@@ -106,7 +107,10 @@ class ClockifyManager {
       );
       // catch HTTP errors
       if (!response.ok) {
-        console.error(`Failed to add time entries: ${response.statusText}`.red);
+        console.error(
+          `Failed to add time entry: ${response.statusText}, payload: ${payload}`
+            .red
+        );
         return;
       }
       // catch async errors
@@ -120,8 +124,8 @@ async function main() {
   const clockifyManager = new ClockifyManager();
   await clockifyManager.fetchClockifyWorkspaces();
   const workspaceId = await clockifyManager.getWorkspaceId();
-  if (workspaceId) {
-    clockifyManager.addTimeEntry(workspaceId);
-  }
+  // if (workspaceId) {
+  //   clockifyManager.addTimeEntry(workspaceId);
+  // }
 }
 main();

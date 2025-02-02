@@ -10,7 +10,7 @@ import {
   TodoistApi,
   Project,
 } from "@doist/todoist-api-typescript";
-import { TimeEntry } from "./clockify";
+import { TimeEntry, ClockifyManager } from "./clockify";
 
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
@@ -52,7 +52,9 @@ class TodoistTaskManager {
 
   async fetchTasks() {
     try {
-      const response = await todoist.getTasks({ filter: "today" });
+      const response = await todoist.getTasks({
+        filter: "today & !#Habits & !#Subscriptions",
+      });
       this.tasks = response.results;
     } catch (error) {
       console.error(`Error fetching tasks: ${error}`.red);
@@ -73,14 +75,14 @@ class TodoistTaskManager {
       timeEntries.push({
         billable: false,
         description: task.description,
-        start: task.due?.string || "",
-        end: task.due?.string || "",
+        start: `${task.due?.datetime}Z` || "",
+        end: `${task.due?.datetime}Z` || "",
         type: "REGULAR",
       });
     });
     console.log(`${JSON.stringify(timeEntries, null, 2)}`.bgCyan);
+    return timeEntries;
   }
-  formatDates() {}
 }
 
 // Runs script
@@ -88,7 +90,15 @@ async function main() {
   const todoistTaskManager = new TodoistTaskManager();
   await todoistTaskManager.fetchTasks();
   todoistTaskManager.logTasks();
-  todoistTaskManager.formatTasksForClockify();
+  const timeEntries = await todoistTaskManager.formatTasksForClockify();
+  const clockifyManager = new ClockifyManager();
+  await clockifyManager.fetchClockifyWorkspaces();
+  const workspaceId = await clockifyManager.getWorkspaceId();
+  if (workspaceId) {
+    for (const timeEntry of timeEntries) {
+      clockifyManager.addTimeEntry(workspaceId, timeEntry);
+    }
+  }
   // const todoistProjects = new TodoistProjectManager();
   // todoistProjects.fetchProjects();
   // todoistProjects.logProjects();

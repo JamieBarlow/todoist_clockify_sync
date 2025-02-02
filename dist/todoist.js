@@ -13,6 +13,7 @@ require("dotenv/config");
 require("colors");
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY;
 const todoist_api_typescript_1 = require("@doist/todoist-api-typescript");
+const clockify_1 = require("./clockify");
 if (!TODOIST_API_KEY) {
     throw new Error("Missing TODOIST_API_KEY in environment variables");
 }
@@ -58,7 +59,9 @@ class TodoistTaskManager {
     fetchTasks() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const response = yield todoist.getTasks({ filter: "today" });
+                const response = yield todoist.getTasks({
+                    filter: "today & !#Habits & !#Subscriptions",
+                });
                 this.tasks = response.results;
             }
             catch (error) {
@@ -81,14 +84,14 @@ class TodoistTaskManager {
             timeEntries.push({
                 billable: false,
                 description: task.description,
-                start: ((_a = task.due) === null || _a === void 0 ? void 0 : _a.string) || "",
-                end: ((_b = task.due) === null || _b === void 0 ? void 0 : _b.string) || "",
+                start: `${(_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime}Z` || "",
+                end: `${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}Z` || "",
                 type: "REGULAR",
             });
         });
         console.log(`${JSON.stringify(timeEntries, null, 2)}`.bgCyan);
+        return timeEntries;
     }
-    formatDates() { }
 }
 // Runs script
 function main() {
@@ -96,7 +99,15 @@ function main() {
         const todoistTaskManager = new TodoistTaskManager();
         yield todoistTaskManager.fetchTasks();
         todoistTaskManager.logTasks();
-        todoistTaskManager.formatTasksForClockify();
+        const timeEntries = yield todoistTaskManager.formatTasksForClockify();
+        const clockifyManager = new clockify_1.ClockifyManager();
+        yield clockifyManager.fetchClockifyWorkspaces();
+        const workspaceId = yield clockifyManager.getWorkspaceId();
+        if (workspaceId) {
+            for (const timeEntry of timeEntries) {
+                clockifyManager.addTimeEntry(workspaceId, timeEntry);
+            }
+        }
         // const todoistProjects = new TodoistProjectManager();
         // todoistProjects.fetchProjects();
         // todoistProjects.logProjects();

@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.ClockifyManager = void 0;
 require("dotenv/config");
 require("colors");
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
@@ -50,14 +51,15 @@ class ClockifyManager {
         }
         return this.workspaces;
     }
-    addTimeEntry(id) {
+    addTimeEntry(id, timeEntry) {
         return __awaiter(this, void 0, void 0, function* () {
+            const { billable, description, start, end, type } = timeEntry;
             const payload = {
-                billable: false,
-                description: "This is a sample time entry description",
-                start: "2025-02-01T09:00:00Z",
-                end: "2025-02-01T10:00:00Z",
-                type: "REGULAR",
+                billable,
+                description,
+                start,
+                end,
+                type,
             };
             try {
                 const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${id}/time-entries`, {
@@ -67,7 +69,8 @@ class ClockifyManager {
                 });
                 // catch HTTP errors
                 if (!response.ok) {
-                    console.error(`Failed to add time entries: ${response.statusText}`.red);
+                    console.error(`Failed to add time entry: ${response.statusText}, payload: ${payload}`
+                        .red);
                     return;
                 }
                 // catch async errors
@@ -78,14 +81,15 @@ class ClockifyManager {
         });
     }
 }
+exports.ClockifyManager = ClockifyManager;
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const clockifyManager = new ClockifyManager();
         yield clockifyManager.fetchClockifyWorkspaces();
         const workspaceId = yield clockifyManager.getWorkspaceId();
-        if (workspaceId) {
-            clockifyManager.addTimeEntry(workspaceId);
-        }
+        // if (workspaceId) {
+        //   clockifyManager.addTimeEntry(workspaceId);
+        // }
     });
 }
 main();
