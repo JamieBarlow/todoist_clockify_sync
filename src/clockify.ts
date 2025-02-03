@@ -1,5 +1,6 @@
 import "dotenv/config";
 import "colors";
+import { StringMappingType } from "typescript";
 
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 
@@ -16,7 +17,19 @@ interface ClockifyWorkspace {
   subdomain: {};
   workspaceSettings: {};
 }
-type GetWorkspacesResponse = ClockifyWorkspace[];
+type FetchWorkspacesResponse = ClockifyWorkspace[];
+
+interface ClockifyProject {
+  color: string;
+  duration: string;
+  id: string;
+  memberships: [];
+  name: string;
+  note: string;
+  public: boolean;
+  workspaceId: string;
+}
+type FetchProjectsResponse = ClockifyProject[];
 
 export interface TimeEntry {
   billable: boolean;
@@ -52,8 +65,9 @@ const headers: HeadersInit = {
 };
 
 export class ClockifyManager {
-  private workspaces: GetWorkspacesResponse | undefined;
-  async fetchClockifyWorkspaces(): Promise<GetWorkspacesResponse> {
+  private workspaces: FetchWorkspacesResponse | undefined;
+  private projects: FetchProjectsResponse | undefined;
+  async fetchClockifyWorkspaces(): Promise<FetchWorkspacesResponse> {
     try {
       const response = await fetch(
         "https://api.clockify.me/api/v1/workspaces",
@@ -67,7 +81,7 @@ export class ClockifyManager {
           `Failed to fetch workspaces: ${response.statusText}`.red
         );
       }
-      const workspaces: GetWorkspacesResponse = await response.json();
+      const workspaces: FetchWorkspacesResponse = await response.json();
       workspaces.forEach((workspace) => {
         console.log(
           `Workspace name: ${workspace.name}. Workspace ID: ${workspace.id}`
@@ -81,12 +95,39 @@ export class ClockifyManager {
     }
     return [];
   }
-  getWorkspaceId() {
+
+  getWorkspaceId(): string {
     if (this.workspaces) {
       return this.workspaces[0].id;
     }
-    return this.workspaces;
+    return "";
   }
+  async fetchAllProjects(workspaceId: string): Promise<FetchProjectsResponse> {
+    try {
+      const response = await fetch(
+        `https://api.clockify.me/api/v1/workspaces/${workspaceId}/projects`,
+        {
+          method: "GET",
+          headers: headers,
+        }
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch projects: ${response.statusText}`.red);
+      }
+      const projects: FetchProjectsResponse = await response.json();
+      projects.forEach((project) => {
+        console.log(
+          `Project name: ${project.name}. Project ID: ${project.id}`.bgMagenta
+        );
+      });
+      this.projects = projects;
+      return projects;
+    } catch (error) {
+      console.error(error);
+    }
+    return [];
+  }
+
   async addTimeEntry(id: string, timeEntry: TimeEntry): Promise<void> {
     const { billable, description, start, end, type } = timeEntry;
     const payload: TimeEntry = {

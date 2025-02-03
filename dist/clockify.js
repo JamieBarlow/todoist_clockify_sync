@@ -49,7 +49,30 @@ class ClockifyManager {
         if (this.workspaces) {
             return this.workspaces[0].id;
         }
-        return this.workspaces;
+        return "";
+    }
+    fetchAllProjects(workspaceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${workspaceId}/projects`, {
+                    method: "GET",
+                    headers: headers,
+                });
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch projects: ${response.statusText}`.red);
+                }
+                const projects = yield response.json();
+                projects.forEach((project) => {
+                    console.log(`Project name: ${project.name}. Project ID: ${project.id}`.bgMagenta);
+                });
+                this.projects = projects;
+                return projects;
+            }
+            catch (error) {
+                console.error(error);
+            }
+            return [];
+        });
     }
     addTimeEntry(id, timeEntry) {
         return __awaiter(this, void 0, void 0, function* () {

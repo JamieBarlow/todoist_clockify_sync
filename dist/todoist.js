@@ -47,9 +47,25 @@ class TodoistProjectManager {
             projects.forEach((project) => console.log(`${project.name}`.bgWhite));
         });
     }
-    // Getter for accessing stored projects
-    getProjects() {
+    getAllProjects() {
         return this.projects;
+    }
+    // Lists all project names associated with tasks
+    getTaskProjectNames(ids) {
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.fetchProjects();
+            const allProjects = this.getAllProjects();
+            const projectNames = ids.map((id) => {
+                const project = allProjects.find((p) => p.id === id);
+                if (project) {
+                    return project.name;
+                }
+                else {
+                    return "";
+                }
+            });
+            return projectNames;
+        });
     }
 }
 exports.TodoistProjectManager = TodoistProjectManager;
@@ -74,6 +90,10 @@ class TodoistTaskManager {
     getTasks() {
         return this.tasks;
     }
+    getTaskProjectIds() {
+        const ids = this.tasks.map((task) => task.projectId);
+        return ids;
+    }
     logTasks() {
         console.log(`Tasks due today: ${this.tasks.length}`.green);
         this.tasks.forEach((task) => console.log(`${task.content}`.blue));
@@ -81,21 +101,32 @@ class TodoistTaskManager {
     // Calculates start and end times from the Todoist task's datetime value. Allows for conversion to Clockify tasks
     getTaskTiming(task) {
         var _a, _b;
-        const duration = (_a = task.duration) === null || _a === void 0 ? void 0 : _a.amount;
-        const startTime = new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`).toISOString();
-        const endTime = new Date(startTime);
-        if (duration) {
+        if (task.duration && task.due) {
+            const duration = (_a = task.duration) === null || _a === void 0 ? void 0 : _a.amount;
+            console.log(task);
+            const startTime = new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`).toISOString();
+            console.log(`${startTime}: type of ${typeof startTime}`.bgRed);
+            const endTime = new Date(startTime);
             endTime.setMinutes(endTime.getMinutes() + duration);
+            const endTimeStr = endTime.toISOString();
+            return {
+                startTime: startTime,
+                endTime: endTimeStr,
+            };
         }
-        const endTimeStr = endTime.toISOString();
-        return {
-            startTime: startTime,
-            endTime: endTimeStr,
-        };
+        else {
+            console.log(task.content);
+            console.log("No time for task".red);
+            return {
+                startTime: "",
+                endTime: "",
+            };
+        }
     }
-    formatTasksForClockify() {
+    formatTasksForClockify(projectNames) {
         const timeEntries = [];
-        this.tasks.forEach((task) => {
+        for (let i = 0; i < this.tasks.length; i++) {
+            const task = this.tasks[i];
             const { startTime, endTime } = this.getTaskTiming(task);
             timeEntries.push({
                 billable: false,
@@ -103,8 +134,9 @@ class TodoistTaskManager {
                 start: startTime,
                 end: endTime,
                 type: "REGULAR",
+                projectId: projectNames === null || projectNames === void 0 ? void 0 : projectNames[i],
             });
-        });
+        }
         console.log(`${JSON.stringify(timeEntries, null, 2)}`.bgCyan);
         return timeEntries;
     }

@@ -15,20 +15,23 @@ const clockify_1 = require("./clockify");
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
+        const todoistProjectManager = new todoist_1.TodoistProjectManager();
+        // Fetch Todoist tasks, then their associated project ids and project names. From this data, create Clockify time entries
         yield todoistTaskManager.fetchTasks();
         todoistTaskManager.logTasks();
-        const timeEntries = yield todoistTaskManager.formatTasksForClockify();
+        const projectIds = todoistTaskManager.getTaskProjectIds();
+        const projectNames = yield todoistProjectManager.getTaskProjectNames(projectIds);
+        const timeEntries = todoistTaskManager.formatTasksForClockify(projectNames);
         const clockifyManager = new clockify_1.ClockifyManager();
         yield clockifyManager.fetchClockifyWorkspaces();
-        const workspaceId = yield clockifyManager.getWorkspaceId();
-        if (workspaceId) {
-            for (const timeEntry of timeEntries) {
-                clockifyManager.addTimeEntry(workspaceId, timeEntry);
-            }
-        }
-        const todoistProjects = new todoist_1.TodoistProjectManager();
-        todoistProjects.fetchProjects();
-        todoistProjects.logProjects();
+        const workspaceId = clockifyManager.getWorkspaceId();
+        const clockifyProjects = yield clockifyManager.fetchAllProjects(workspaceId);
+        console.log(`${JSON.stringify(clockifyProjects, null, 2)}`.bgGreen);
+        // if (workspaceId) {
+        //   for (const timeEntry of timeEntries) {
+        //     clockifyManager.addTimeEntry(workspaceId, timeEntry);
+        //   }
+        // }
     });
 }
 main();
