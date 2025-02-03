@@ -82,12 +82,6 @@ export class ClockifyManager {
         );
       }
       const workspaces: FetchWorkspacesResponse = await response.json();
-      workspaces.forEach((workspace) => {
-        console.log(
-          `Workspace name: ${workspace.name}. Workspace ID: ${workspace.id}`
-            .bgMagenta
-        );
-      });
       this.workspaces = workspaces;
       return workspaces;
     } catch (error) {
@@ -115,11 +109,6 @@ export class ClockifyManager {
         throw new Error(`Failed to fetch projects: ${response.statusText}`.red);
       }
       const projects: FetchProjectsResponse = await response.json();
-      projects.forEach((project) => {
-        console.log(
-          `Project name: ${project.name}. Project ID: ${project.id}`.bgMagenta
-        );
-      });
       this.projects = projects;
       return projects;
     } catch (error) {
@@ -129,13 +118,14 @@ export class ClockifyManager {
   }
 
   async addTimeEntry(id: string, timeEntry: TimeEntry): Promise<void> {
-    const { billable, description, start, end, type } = timeEntry;
+    const { billable, description, start, end, type, projectId } = timeEntry;
     const payload: TimeEntry = {
       billable,
       description,
       start,
       end,
       type,
+      projectId,
     };
     try {
       const response = await fetch(

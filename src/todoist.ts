@@ -92,9 +92,7 @@ export class TodoistTaskManager {
   getTaskTiming(task: Task) {
     if (task.duration && task.due) {
       const duration = task.duration?.amount;
-      console.log(task);
       const startTime = new Date(`${task.due?.datetime}`).toISOString();
-      console.log(`${startTime}: type of ${typeof startTime}`.bgRed);
       const endTime = new Date(startTime);
       endTime.setMinutes(endTime.getMinutes() + duration);
       const endTimeStr = endTime.toISOString();
@@ -103,30 +101,32 @@ export class TodoistTaskManager {
         endTime: endTimeStr,
       };
     } else {
-      console.log(task.content);
-      console.log("No time for task".red);
       return {
-        startTime: "",
-        endTime: "",
+        startTime: undefined,
+        endTime: undefined,
       };
     }
   }
 
-  formatTasksForClockify(projectNames?: string[]): TimeEntry[] {
+  formatTasksForClockify(projectIds?: string[]): TimeEntry[] {
     const timeEntries: TimeEntry[] = [];
     for (let i = 0; i < this.tasks.length; i++) {
       const task = this.tasks[i];
       const { startTime, endTime } = this.getTaskTiming(task);
-      timeEntries.push({
-        billable: false,
-        description: task.content,
-        start: startTime,
-        end: endTime,
-        type: "REGULAR",
-        projectId: projectNames?.[i],
-      });
+      if (startTime && endTime) {
+        timeEntries.push({
+          billable: false,
+          description: task.content,
+          start: startTime,
+          end: endTime,
+          type: "REGULAR",
+          projectId: projectIds?.[i],
+        });
+      }
     }
-    console.log(`${JSON.stringify(timeEntries, null, 2)}`.bgCyan);
+    console.log(
+      `Time entries: ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta
+    );
     return timeEntries;
   }
 }

@@ -103,9 +103,7 @@ class TodoistTaskManager {
         var _a, _b;
         if (task.duration && task.due) {
             const duration = (_a = task.duration) === null || _a === void 0 ? void 0 : _a.amount;
-            console.log(task);
             const startTime = new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`).toISOString();
-            console.log(`${startTime}: type of ${typeof startTime}`.bgRed);
             const endTime = new Date(startTime);
             endTime.setMinutes(endTime.getMinutes() + duration);
             const endTimeStr = endTime.toISOString();
@@ -115,29 +113,29 @@ class TodoistTaskManager {
             };
         }
         else {
-            console.log(task.content);
-            console.log("No time for task".red);
             return {
-                startTime: "",
-                endTime: "",
+                startTime: undefined,
+                endTime: undefined,
             };
         }
     }
-    formatTasksForClockify(projectNames) {
+    formatTasksForClockify(projectIds) {
         const timeEntries = [];
         for (let i = 0; i < this.tasks.length; i++) {
             const task = this.tasks[i];
             const { startTime, endTime } = this.getTaskTiming(task);
-            timeEntries.push({
-                billable: false,
-                description: task.content,
-                start: startTime,
-                end: endTime,
-                type: "REGULAR",
-                projectId: projectNames === null || projectNames === void 0 ? void 0 : projectNames[i],
-            });
+            if (startTime && endTime) {
+                timeEntries.push({
+                    billable: false,
+                    description: task.content,
+                    start: startTime,
+                    end: endTime,
+                    type: "REGULAR",
+                    projectId: projectIds === null || projectIds === void 0 ? void 0 : projectIds[i],
+                });
+            }
         }
-        console.log(`${JSON.stringify(timeEntries, null, 2)}`.bgCyan);
+        console.log(`Time entries: ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta);
         return timeEntries;
     }
 }
