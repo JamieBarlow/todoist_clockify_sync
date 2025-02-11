@@ -8,7 +8,6 @@ async function main() {
   // Fetch Todoist tasks, then their associated project ids and project names.
   await todoistTaskManager.fetchTasks();
   todoistTaskManager.logTasks();
-  const todoistTasks = todoistTaskManager.getTasks();
   const todoistProjectIds = todoistTaskManager.getTaskProjectIds();
   const todoistProjectNames = await todoistProjectManager.getTaskProjectNames(
     todoistProjectIds

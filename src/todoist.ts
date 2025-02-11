@@ -10,8 +10,7 @@ import {
   TodoistApi,
   Project,
 } from "@doist/todoist-api-typescript";
-import { TimeEntry, ClockifyManager } from "./clockify";
-import { time } from "console";
+import { NewTimeEntry } from "./clockify";
 
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
@@ -108,8 +107,8 @@ export class TodoistTaskManager {
     }
   }
 
-  formatTasksForClockify(projectIds?: string[]): TimeEntry[] {
-    const timeEntries: TimeEntry[] = [];
+  formatTasksForClockify(projectIds?: string[]): NewTimeEntry[] {
+    const timeEntries: NewTimeEntry[] = [];
     for (let i = 0; i < this.tasks.length; i++) {
       const task = this.tasks[i];
       const { startTime, endTime } = this.getTaskTiming(task);

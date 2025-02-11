@@ -31,7 +31,21 @@ interface ClockifyProject {
 }
 type FetchProjectsResponse = ClockifyProject[];
 
-export interface TimeEntry {
+interface User {
+  activeWorkspace: string;
+  customFields?: [];
+  defaultWorkspace: string;
+  email: string;
+  id: string;
+  memberships: [];
+  name: string;
+  profilePicture: string;
+  settings: {};
+  status: string;
+}
+type FetchUserIdsResponse = User[];
+
+export interface NewTimeEntry {
   billable: boolean;
   customAttributes?: [
     {
@@ -54,6 +68,28 @@ export interface TimeEntry {
   tagIds?: string[];
   taskId?: string;
   type: "REGULAR" | "BREAK";
+}
+
+interface FetchedTimeEntry {
+  billable: boolean;
+  costRate: {};
+  customFieldValues: [];
+  description: string;
+  hourlyRate: {};
+  id: string;
+  isLocked: boolean;
+  kioskId: string;
+  projectId: string;
+  tagIds?: [];
+  taskId?: string;
+  timeInterval: {
+    start?: string;
+    end?: string;
+    duration?: string;
+  };
+  type: string;
+  userId: string;
+  workspaceId: string;
 }
 
 if (!CLOCKIFY_API_KEY) {
@@ -117,9 +153,60 @@ export class ClockifyManager {
     return [];
   }
 
-  async addTimeEntry(id: string, timeEntry: TimeEntry): Promise<void> {
+  async fetchUserId(workspaceId: string): Promise<string> {
+    try {
+      const response = await fetch(
+        `https://api.clockify.me/api/v1/workspaces/${workspaceId}/users`,
+        { method: "GET", headers: headers }
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch user Ids: ${response.statusText}`);
+      }
+      const userIds: FetchUserIdsResponse = await response.json();
+      return userIds[0].id;
+    } catch (error) {
+      console.error(error);
+    }
+    return "";
+  }
+
+  async fetchAllTimeEntries(
+    workspaceId: string,
+    userId: string
+  ): Promise<FetchedTimeEntry[]> {
+    try {
+      const response = await fetch(
+        `https://api.clockify.me/api/v1/workspaces/${workspaceId}/user/${userId}/time-entries`,
+        { method: "GET", headers: headers }
+      );
+      if (!response.ok) {
+        throw new Error(`Failed to fetch time entries: ${response.statusText}`);
+      }
+      const timeEntries: FetchedTimeEntry[] = await response.json();
+      return timeEntries;
+    } catch (error) {
+      console.error(error);
+    }
+    return [];
+  }
+
+  async fetchTodayTimeEntries(
+    workspaceId: string,
+    userId: string
+  ): Promise<FetchedTimeEntry[]> {
+    const timeEntries = await this.fetchAllTimeEntries(workspaceId, userId);
+    const today = new Date();
+    const todayEntries = timeEntries.filter((entry) => {
+      const date = new Date(`${entry.timeInterval.start}`);
+      return compareDates(today, date);
+    });
+    console.log(`${JSON.stringify(todayEntries).bgWhite}`);
+    return todayEntries;
+  }
+
+  async addTimeEntry(id: string, timeEntry: NewTimeEntry): Promise<void> {
     const { billable, description, start, end, type, projectId } = timeEntry;
-    const payload: TimeEntry = {
+    const payload: NewTimeEntry = {
       billable,
       description,
       start,
@@ -151,3 +238,15 @@ export class ClockifyManager {
     }
   }
 }
+
+const compareDates = (d1: Date, d2: Date): boolean => {
+  if (
+    d1.getFullYear() === d2.getFullYear() &&
+    d1.getMonth() === d2.getMonth() &&
+    d1.getDate() === d2.getDate()
+  ) {
+    return true;
+  } else {
+    return false;
+  }
+};

@@ -19,7 +19,6 @@ function main() {
         // Fetch Todoist tasks, then their associated project ids and project names.
         yield todoistTaskManager.fetchTasks();
         todoistTaskManager.logTasks();
-        const todoistTasks = todoistTaskManager.getTasks();
         const todoistProjectIds = todoistTaskManager.getTaskProjectIds();
         const todoistProjectNames = yield todoistProjectManager.getTaskProjectNames(todoistProjectIds);
         // Fetch Clockify workspaces, and use id of workspace (assuming there is only 1) to fetch all projects (names and ids)
@@ -27,7 +26,6 @@ function main() {
         yield clockifyManager.fetchClockifyWorkspaces();
         const workspaceId = clockifyManager.getWorkspaceId();
         const clockifyProjects = yield clockifyManager.fetchAllProjects(workspaceId);
-        // console.log(`${JSON.stringify(clockifyProjects, null, 2)}`.bgGreen);
         // Check project name of each Todoist task against Clockify project names, and return the Clockify project id if they match
         const projectIds = todoistProjectNames.map((projectName) => {
             const projectMatch = clockifyProjects.find((p) => {

@@ -67,6 +67,50 @@ class ClockifyManager {
             return [];
         });
     }
+    fetchUserIds(workspaceId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${workspaceId}/users`, { method: "GET", headers: headers });
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch user Ids: ${response.statusText}`);
+                }
+                const userIds = yield response.json();
+                return userIds[0].id;
+            }
+            catch (error) {
+                console.error(error);
+            }
+            return "";
+        });
+    }
+    fetchAllTimeEntries(workspaceId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${workspaceId}/user/${userId}/time-entries`, { method: "GET", headers: headers });
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch time entries: ${response.statusText}`);
+                }
+                const timeEntries = yield response.json();
+                return timeEntries;
+            }
+            catch (error) {
+                console.error(error);
+            }
+            return [];
+        });
+    }
+    fetchTodayTimeEntries(workspaceId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const timeEntries = yield this.fetchAllTimeEntries(workspaceId, userId);
+            const today = new Date();
+            const todayEntries = timeEntries.filter((entry) => {
+                const date = new Date(`${entry.timeInterval.start}`);
+                return compareDates(today, date);
+            });
+            console.log(`${JSON.stringify(todayEntries).bgWhite}`);
+            return todayEntries;
+        });
+    }
     addTimeEntry(id, timeEntry) {
         return __awaiter(this, void 0, void 0, function* () {
             const { billable, description, start, end, type, projectId } = timeEntry;
@@ -98,3 +142,13 @@ class ClockifyManager {
     }
 }
 exports.ClockifyManager = ClockifyManager;
+const compareDates = (d1, d2) => {
+    if (d1.getFullYear() === d2.getFullYear() &&
+        d1.getMonth() === d2.getMonth() &&
+        d1.getDate() === d2.getDate()) {
+        return true;
+    }
+    else {
+        return false;
+    }
+};
