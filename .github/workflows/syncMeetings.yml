@@ -1,0 +1,22 @@
+name: Populate Todoist scheduled tasks from Clockify Time Entries
+on:
+  schedule:
+    - cron: "00 06 * * *"
+  workflow_dispatch:
+jobs:
+  cron:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install dependencies (if needed)
+        run: npm ci
+      - name: Run the script
+        run: npm run sync-meetings
+        env:
+          TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
+          CLOCKIFY_API_KEY: ${{ secrets.CLOCKIFY_API_KEY }}
