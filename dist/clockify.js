@@ -67,7 +67,7 @@ class ClockifyManager {
             return [];
         });
     }
-    fetchUserIds(workspaceId) {
+    fetchUserId(workspaceId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${workspaceId}/users`, { method: "GET", headers: headers });
@@ -107,9 +107,37 @@ class ClockifyManager {
                 const date = new Date(`${entry.timeInterval.start}`);
                 return compareDates(today, date);
             });
-            console.log(`${JSON.stringify(todayEntries).bgWhite}`);
+            // console.log(`${JSON.stringify(todayEntries).bgWhite}`);
             return todayEntries;
         });
+    }
+    // Takes in fetched Clockify time entries and formats for Todoist tasks
+    formatForTodoist(timeEntries) {
+        const tasks = [];
+        for (let i = 0; i < timeEntries.length; i++) {
+            const { description, timeInterval } = timeEntries[i];
+            // Formatting start date to submit as human defined time entry
+            const today = new Date();
+            const startTime = new Date(`${timeInterval.start}`);
+            const endTime = new Date(`${timeInterval.end}`);
+            const dueString = compareDates(today, startTime)
+                ? `today at ${startTime.getHours()}:${startTime.getMinutes()}`
+                : `${startTime.getDate()} of ${startTime.getMonth()} at ${startTime.getHours()}:${startTime.getMinutes()}`;
+            // Getting time interval (duration) of task/time entry
+            const duration = endTime.getTime() - startTime.getTime() / (1000 * 60);
+            const durationUnit = "minute";
+            const priority = 3;
+            const dueLang = "eng";
+            tasks.push({
+                content: description,
+                dueString,
+                duration,
+                durationUnit,
+                dueLang,
+                priority,
+            });
+        }
+        return tasks;
     }
     addTimeEntry(id, timeEntry) {
         return __awaiter(this, void 0, void 0, function* () {

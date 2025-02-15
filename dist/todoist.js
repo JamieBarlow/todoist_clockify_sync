@@ -119,6 +119,29 @@ class TodoistTaskManager {
             };
         }
     }
+    createTask(taskOrTasks) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Ensure input is in an array (even if single value)
+            const tasks = Array.isArray(taskOrTasks) ? taskOrTasks : [taskOrTasks];
+            try {
+                const results = yield Promise.all(tasks.map((task) => {
+                    const { content, dueString, duration, durationUnit, dueLang, priority, } = task;
+                    todoist.addTask({
+                        content,
+                        dueString,
+                        duration,
+                        durationUnit,
+                        dueLang,
+                        priority,
+                    });
+                }));
+                console.log(JSON.stringify(results).bgGreen);
+            }
+            catch (error) {
+                console.error(error);
+            }
+        });
+    }
     formatTasksForClockify(projectIds) {
         const timeEntries = [];
         for (let i = 0; i < this.tasks.length; i++) {

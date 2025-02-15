@@ -1,6 +1,7 @@
 import "dotenv/config";
 import "colors";
 import { StringMappingType } from "typescript";
+import { AddTaskArgs } from "@doist/todoist-api-typescript";
 
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 
@@ -200,8 +201,38 @@ export class ClockifyManager {
       const date = new Date(`${entry.timeInterval.start}`);
       return compareDates(today, date);
     });
-    console.log(`${JSON.stringify(todayEntries).bgWhite}`);
+    // console.log(`${JSON.stringify(todayEntries).bgWhite}`);
     return todayEntries;
+  }
+
+  // Takes in fetched Clockify time entries and formats for Todoist tasks
+  formatForTodoist(timeEntries: FetchedTimeEntry[]): AddTaskArgs[] {
+    const tasks: AddTaskArgs[] = [];
+    for (let i = 0; i < timeEntries.length; i++) {
+      const { description, timeInterval } = timeEntries[i];
+      // Formatting start date to submit as human defined time entry
+      const today = new Date();
+      const startTime = new Date(`${timeInterval.start}`);
+      const endTime = new Date(`${timeInterval.end}`);
+      const dueString = compareDates(today, startTime)
+        ? `today at ${startTime.getHours()}:${startTime.getMinutes()}`
+        : `${startTime.getDate()} of ${startTime.getMonth()} at ${startTime.getHours()}:${startTime.getMinutes()}`;
+      // Getting time interval (duration) of task/time entry
+      const duration: number =
+        endTime.getTime() - startTime.getTime() / (1000 * 60);
+      const durationUnit = "minute";
+      const priority = 3;
+      const dueLang = "eng";
+      tasks.push({
+        content: description,
+        dueString,
+        duration,
+        durationUnit,
+        dueLang,
+        priority,
+      });
+    }
+    return tasks;
   }
 
   async addTimeEntry(id: string, timeEntry: NewTimeEntry): Promise<void> {

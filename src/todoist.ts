@@ -6,6 +6,7 @@ const TODOIST_API_KEY = process.env.TODOIST_API_KEY;
 import {
   GetProjectsResponse,
   GetTasksResponse,
+  AddTaskArgs,
   Task,
   TodoistApi,
   Project,
@@ -15,6 +16,12 @@ import { NewTimeEntry } from "./clockify";
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
 }
+
+// Extending arguments for adding a task in Todoist (not included in types but here https://developer.todoist.com/rest/v2/#create-a-new-task)
+type AddTaskArgsExtended = AddTaskArgs & {
+  duration?: number;
+};
+
 const todoist = new TodoistApi(TODOIST_API_KEY);
 export class TodoistProjectManager {
   private projects: Project[] = []; // Typed encapsulated state
@@ -104,6 +111,38 @@ export class TodoistTaskManager {
         startTime: undefined,
         endTime: undefined,
       };
+    }
+  }
+
+  async createTask(
+    taskOrTasks: AddTaskArgsExtended | AddTaskArgsExtended[]
+  ): Promise<void> {
+    // Ensure input is in an array (even if single value)
+    const tasks = Array.isArray(taskOrTasks) ? taskOrTasks : [taskOrTasks];
+    try {
+      const results = await Promise.all(
+        tasks.map((task) => {
+          const {
+            content,
+            dueString,
+            duration,
+            durationUnit,
+            dueLang,
+            priority,
+          } = task;
+          todoist.addTask({
+            content,
+            dueString,
+            duration,
+            durationUnit,
+            dueLang,
+            priority,
+          } as AddTaskArgs);
+        })
+      );
+      console.log(JSON.stringify(results).bgGreen);
+    } catch (error) {
+      console.error(error);
     }
   }
 
