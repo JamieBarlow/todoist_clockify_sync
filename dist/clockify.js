@@ -121,10 +121,19 @@ class ClockifyManager {
             const startTime = new Date(`${timeInterval.start}`);
             const endTime = new Date(`${timeInterval.end}`);
             const dueString = compareDates(today, startTime)
-                ? `today at ${startTime.getHours()}:${startTime.getMinutes()}`
-                : `${startTime.getDate()} of ${startTime.getMonth()} at ${startTime.getHours()}:${startTime.getMinutes()}`;
+                ? `today at ${startTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                })}`
+                : `${startTime.toLocaleDateString("en-GB", {
+                    day: "numeric",
+                    month: "long",
+                })} at ${startTime.toLocaleTimeString([], {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                })}`;
             // Getting time interval (duration) of task/time entry
-            const duration = endTime.getTime() - startTime.getTime() / (1000 * 60);
+            const duration = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
             const durationUnit = "minute";
             const priority = 3;
             const dueLang = "eng";
