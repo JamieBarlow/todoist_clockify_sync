@@ -112,7 +112,7 @@ class ClockifyManager {
         });
     }
     // Takes in fetched Clockify time entries and formats for Todoist tasks
-    formatForTodoist(timeEntries) {
+    formatForTodoist(timeEntries, projectId, sectionId) {
         const tasks = [];
         for (let i = 0; i < timeEntries.length; i++) {
             const { description, timeInterval } = timeEntries[i];
@@ -137,6 +137,9 @@ class ClockifyManager {
             const durationUnit = "minute";
             const priority = 3;
             const dueLang = "eng";
+            // Getting projectId and sectionId for meetings
+            const finalProjectId = projectId !== null && projectId !== void 0 ? projectId : ""; // Nullish coalescing to handle undefined/null
+            const finalSectionId = sectionId !== null && sectionId !== void 0 ? sectionId : "";
             tasks.push({
                 content: description,
                 dueString,
@@ -144,6 +147,8 @@ class ClockifyManager {
                 durationUnit,
                 dueLang,
                 priority,
+                projectId: finalProjectId,
+                sectionId: finalSectionId,
             });
         }
         return tasks;

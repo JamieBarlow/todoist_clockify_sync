@@ -10,6 +10,8 @@ import {
   Task,
   TodoistApi,
   Project,
+  Section,
+  GetSectionsArgs,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
 
@@ -51,6 +53,16 @@ export class TodoistProjectManager {
   getAllProjects(): Project[] {
     return this.projects;
   }
+  async getProjectSections(projectId: GetSectionsArgs): Promise<Section[]> {
+    try {
+      const sections = await todoist.getSections(projectId);
+      return sections.results;
+    } catch (error) {
+      console.error("Failed to fetch sections:", error);
+      return [];
+    }
+  }
+
   // Lists all project names associated with tasks
   async getTaskProjectNames(ids: string[]): Promise<string[]> {
     await this.fetchProjects();
@@ -73,7 +85,7 @@ export class TodoistTaskManager {
   async fetchTasks() {
     try {
       const response = await todoist.getTasks({
-        filter: "today & !#Habits & !#Subscriptions",
+        filter: "today & !#Habits & !#Subscriptions & !/Meetings",
       });
       this.tasks = response.results;
     } catch (error) {
@@ -129,6 +141,8 @@ export class TodoistTaskManager {
             durationUnit,
             dueLang,
             priority,
+            projectId,
+            sectionId,
           } = task;
           todoist.addTask({
             content,
@@ -137,6 +151,8 @@ export class TodoistTaskManager {
             durationUnit,
             dueLang,
             priority,
+            projectId,
+            sectionId,
           } as AddTaskArgs);
         })
       );

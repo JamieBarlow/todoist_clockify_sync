@@ -206,7 +206,11 @@ export class ClockifyManager {
   }
 
   // Takes in fetched Clockify time entries and formats for Todoist tasks
-  formatForTodoist(timeEntries: FetchedTimeEntry[]): AddTaskArgs[] {
+  formatForTodoist(
+    timeEntries: FetchedTimeEntry[],
+    projectId?: string,
+    sectionId?: string
+  ): AddTaskArgs[] {
     const tasks: AddTaskArgs[] = [];
     for (let i = 0; i < timeEntries.length; i++) {
       const { description, timeInterval } = timeEntries[i];
@@ -233,6 +237,11 @@ export class ClockifyManager {
       const durationUnit = "minute";
       const priority = 3;
       const dueLang = "eng";
+
+      // Getting projectId and sectionId for meetings
+      const finalProjectId = projectId ?? ""; // Nullish coalescing to handle undefined/null
+      const finalSectionId = sectionId ?? "";
+
       tasks.push({
         content: description,
         dueString,
@@ -240,6 +249,8 @@ export class ClockifyManager {
         durationUnit,
         dueLang,
         priority,
+        projectId: finalProjectId,
+        sectionId: finalSectionId,
       });
     }
     return tasks;

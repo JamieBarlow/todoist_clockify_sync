@@ -50,6 +50,18 @@ class TodoistProjectManager {
     getAllProjects() {
         return this.projects;
     }
+    getProjectSections(projectId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                const sections = yield todoist.getSections(projectId);
+                return sections.results;
+            }
+            catch (error) {
+                console.error("Failed to fetch sections:", error);
+                return [];
+            }
+        });
+    }
     // Lists all project names associated with tasks
     getTaskProjectNames(ids) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -77,7 +89,7 @@ class TodoistTaskManager {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield todoist.getTasks({
-                    filter: "today & !#Habits & !#Subscriptions",
+                    filter: "today & !#Habits & !#Subscriptions & !/Meetings",
                 });
                 this.tasks = response.results;
             }
@@ -125,7 +137,7 @@ class TodoistTaskManager {
             const tasks = Array.isArray(taskOrTasks) ? taskOrTasks : [taskOrTasks];
             try {
                 const results = yield Promise.all(tasks.map((task) => {
-                    const { content, dueString, duration, durationUnit, dueLang, priority, } = task;
+                    const { content, dueString, duration, durationUnit, dueLang, priority, projectId, sectionId, } = task;
                     todoist.addTask({
                         content,
                         dueString,
@@ -133,6 +145,8 @@ class TodoistTaskManager {
                         durationUnit,
                         dueLang,
                         priority,
+                        projectId,
+                        sectionId,
                     });
                 }));
                 console.log(JSON.stringify(results).bgGreen);
