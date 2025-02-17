@@ -189,5 +189,23 @@ class TodoistTaskManager {
             }
         });
     }
+    rescheduleTasks(taskId, dueString) {
+        return __awaiter(this, void 0, void 0, function* () {
+            // Ensure input is in an array (even if single value) - allows for single or multiple values
+            const taskIds = Array.isArray(taskId) ? taskId : [taskId];
+            console.log(`Task IDs: ${JSON.stringify(taskIds)}`);
+            try {
+                yield Promise.all(taskIds.map((id) => __awaiter(this, void 0, void 0, function* () {
+                    yield todoist.updateTask(id, { dueString });
+                    console.log(`Task rescheduled successfully: ${id}} rescheduled from ${dueString}`
+                        .green);
+                })));
+            }
+            catch (error) {
+                console.error(`Error updating task: ${error}`.red);
+                throw error;
+            }
+        });
+    }
 }
 exports.TodoistTaskManager = TodoistTaskManager;

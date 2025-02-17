@@ -14,6 +14,7 @@
     "start-clockify": "npm run build && node dist/clockify.js",
     "start": "npm run build && node dist/main.js",
     "sync-meetings": "npm run build && node dist/syncMeetings.js",
-    "close-tasks": "npm run build && node dist/closeTasks.js"
+    "close-tasks": "npm run build && node dist/closeTasks.js",
+    "reschedule": "npm run build && node dist/rescheduleOverdue.js"
   }
 }

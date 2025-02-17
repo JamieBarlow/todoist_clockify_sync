@@ -13,6 +13,8 @@ import {
   Section,
   GetSectionsArgs,
   GetTasksArgs,
+  UpdateTaskArgs,
+  DueDate,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
 
@@ -193,6 +195,25 @@ export class TodoistTaskManager {
       console.log(`Successfully closed task: ${task.content}`.green);
     } catch (error) {
       console.error(`Error closing task: ${error}`.red);
+      throw error;
+    }
+  }
+
+  async rescheduleTasks(
+    taskId: string | string[],
+    dueString: string
+  ): Promise<void> {
+    // Ensure input is in an array (even if single value) - allows for single or multiple values
+    const taskIds = Array.isArray(taskId) ? taskId : [taskId];
+    try {
+      await Promise.all(
+        taskIds.map(async (id) => {
+          await todoist.updateTask(id, { dueString });
+          console.log(`Task rescheduled successfully: ${id}}`.green);
+        })
+      );
+    } catch (error) {
+      console.error(`Error updating task: ${error}`.red);
       throw error;
     }
   }
