@@ -264,7 +264,7 @@ export class ClockifyManager {
       start,
       end,
       type,
-      projectId,
+      ...(projectId && { projectId }), // conditionally include projectId - handles cases where projectId isn't present
     };
     try {
       const response = await fetch(

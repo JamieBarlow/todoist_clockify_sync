@@ -156,14 +156,11 @@ class ClockifyManager {
     addTimeEntry(id, timeEntry) {
         return __awaiter(this, void 0, void 0, function* () {
             const { billable, description, start, end, type, projectId } = timeEntry;
-            const payload = {
-                billable,
+            const payload = Object.assign({ billable,
                 description,
                 start,
                 end,
-                type,
-                projectId,
-            };
+                type }, (projectId && { projectId }));
             try {
                 const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${id}/time-entries`, {
                     method: "POST",
