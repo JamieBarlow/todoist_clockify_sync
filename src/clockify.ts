@@ -1,6 +1,7 @@
 import "dotenv/config";
 import "colors";
 import { StringMappingType } from "typescript";
+import { compareDates } from "./utility";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
@@ -290,15 +291,3 @@ export class ClockifyManager {
     }
   }
 }
-
-const compareDates = (d1: Date, d2: Date): boolean => {
-  if (
-    d1.getFullYear() === d2.getFullYear() &&
-    d1.getMonth() === d2.getMonth() &&
-    d1.getDate() === d2.getDate()
-  ) {
-    return true;
-  } else {
-    return false;
-  }
-};

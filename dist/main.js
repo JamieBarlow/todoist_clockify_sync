@@ -11,6 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const todoist_1 = require("./todoist");
 const clockify_1 = require("./clockify");
+const utility_1 = require("./utility");
 // Runs script
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -40,8 +41,46 @@ function main() {
             }
         });
         const timeEntries = todoistTaskManager.formatTasksForClockify(projectIds);
+        // Filter out duplicate entries (i.e. any time entries already present in Clockify)
+        function filterDuplicates() {
+            return __awaiter(this, void 0, void 0, function* () {
+                const userId = yield clockifyManager.fetchUserId(workspaceId);
+                const existingTimeEntries = yield clockifyManager.fetchTodayTimeEntries(workspaceId, userId);
+                const filtered = timeEntries.filter((timeEntry) => {
+                    // Check for matching item name AND start time (same name may reoccur throughout day)
+                    const match = existingTimeEntries.find((existing) => {
+                        let matchingStartTime;
+                        if (existing.timeInterval.start) {
+                            const existingEntryDate = new Date(existing.timeInterval.start);
+                            const timeEntryDate = new Date(timeEntry.start);
+                            matchingStartTime = (0, utility_1.compareTimes)(existingEntryDate, timeEntryDate);
+                        }
+                        if (matchingStartTime) {
+                            console.log(`Matching start time! ${existing.timeInterval.start}`.bgRed);
+                        }
+                        if (timeEntry.description === existing.description &&
+                            matchingStartTime) {
+                            return true;
+                        }
+                        else {
+                            return false;
+                        }
+                    });
+                    if (match) {
+                        console.log(`Duplicate found: ${timeEntry.description}`.bgRed);
+                        return false;
+                    }
+                    else {
+                        console.log(`New time entry added: ${timeEntry.description}`.bgGreen);
+                        return true;
+                    }
+                });
+                return filtered;
+            });
+        }
+        const filteredTimeEntries = yield filterDuplicates();
         if (workspaceId) {
-            for (const timeEntry of timeEntries) {
+            for (const timeEntry of filteredTimeEntries) {
                 clockifyManager.addTimeEntry(workspaceId, timeEntry);
             }
         }

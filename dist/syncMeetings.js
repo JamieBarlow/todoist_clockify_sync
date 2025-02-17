@@ -44,6 +44,7 @@ function syncMeetingsToTasks() {
         const ids = yield fetchIds();
         const { workAdminProjectId, meetingsSectionId } = ids;
         const tasks = clockifyManager.formatForTodoist(timeEntries, workAdminProjectId, meetingsSectionId);
+        // Add meetings as Todoist tasks
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
         yield todoistTaskManager.createTask(tasks);
     });

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.ClockifyManager = void 0;
 require("dotenv/config");
 require("colors");
+const utility_1 = require("./utility");
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 if (!CLOCKIFY_API_KEY) {
     throw new Error("Missing CLOCKIFY_API_KEY in environment variables");
@@ -105,7 +106,7 @@ class ClockifyManager {
             const today = new Date();
             const todayEntries = timeEntries.filter((entry) => {
                 const date = new Date(`${entry.timeInterval.start}`);
-                return compareDates(today, date);
+                return (0, utility_1.compareDates)(today, date);
             });
             // console.log(`${JSON.stringify(todayEntries).bgWhite}`);
             return todayEntries;
@@ -120,7 +121,7 @@ class ClockifyManager {
             const today = new Date();
             const startTime = new Date(`${timeInterval.start}`);
             const endTime = new Date(`${timeInterval.end}`);
-            const dueString = compareDates(today, startTime)
+            const dueString = (0, utility_1.compareDates)(today, startTime)
                 ? `today at ${startTime.toLocaleTimeString([], {
                     hour: "2-digit",
                     minute: "2-digit",
@@ -181,13 +182,3 @@ class ClockifyManager {
     }
 }
 exports.ClockifyManager = ClockifyManager;
-const compareDates = (d1, d2) => {
-    if (d1.getFullYear() === d2.getFullYear() &&
-        d1.getMonth() === d2.getMonth() &&
-        d1.getDate() === d2.getDate()) {
-        return true;
-    }
-    else {
-        return false;
-    }
-};

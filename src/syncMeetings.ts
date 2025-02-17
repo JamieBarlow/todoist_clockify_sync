@@ -40,6 +40,7 @@ async function syncMeetingsToTasks() {
     workAdminProjectId,
     meetingsSectionId
   );
+  // Add meetings as Todoist tasks
   const todoistTaskManager = new TodoistTaskManager();
   await todoistTaskManager.createTask(tasks);
 }
