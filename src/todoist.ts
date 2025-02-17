@@ -12,6 +12,7 @@ import {
   Project,
   Section,
   GetSectionsArgs,
+  GetTasksArgs,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
 
@@ -82,18 +83,20 @@ export class TodoistProjectManager {
 export class TodoistTaskManager {
   private tasks: Task[] = []; // encapsulated state
 
-  async fetchTasks() {
+  async fetchTasks(filter: string): Promise<GetTasksResponse> {
     try {
       const response = await todoist.getTasks({
-        filter: "today & !#Habits & !#Subscriptions & !/Meetings",
+        filter,
       });
       this.tasks = response.results;
+      return response;
     } catch (error) {
       console.error(`Error fetching tasks: ${error}`.red);
+      throw error;
     }
   }
   // Getter method to access tasks
-  getTasks() {
+  getTasks(): Task[] {
     return this.tasks;
   }
   getTaskProjectIds(): string[] {
@@ -101,7 +104,7 @@ export class TodoistTaskManager {
     return ids;
   }
 
-  logTasks() {
+  logTasks(): void {
     console.log(`Tasks due today: ${this.tasks.length}`.green);
     this.tasks.forEach((task) => console.log(`${task.content}`.blue));
   }
@@ -182,5 +185,15 @@ export class TodoistTaskManager {
       `Time entries: ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta
     );
     return timeEntries;
+  }
+
+  async closeTask(task: Task): Promise<void> {
+    try {
+      await todoist.closeTask(task.id);
+      console.log(`Successfully closed task: ${task.content}`.green);
+    } catch (error) {
+      console.error(`Error closing task: ${error}`.red);
+      throw error;
+    }
   }
 }

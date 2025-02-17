@@ -7,7 +7,9 @@ async function main() {
   const todoistTaskManager = new TodoistTaskManager();
   const todoistProjectManager = new TodoistProjectManager();
   // Fetch Todoist tasks, then their associated project ids and project names.
-  await todoistTaskManager.fetchTasks();
+  await todoistTaskManager.fetchTasks(
+    "today & !#Habits & !#Subscriptions & !/Meetings"
+  );
   todoistTaskManager.logTasks();
   const todoistProjectIds = todoistTaskManager.getTaskProjectIds();
   const todoistProjectNames = await todoistProjectManager.getTaskProjectNames(

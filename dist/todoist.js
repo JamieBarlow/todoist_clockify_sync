@@ -85,16 +85,18 @@ class TodoistTaskManager {
     constructor() {
         this.tasks = []; // encapsulated state
     }
-    fetchTasks() {
+    fetchTasks(filter) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const response = yield todoist.getTasks({
-                    filter: "today & !#Habits & !#Subscriptions & !/Meetings",
+                    filter,
                 });
                 this.tasks = response.results;
+                return response;
             }
             catch (error) {
                 console.error(`Error fetching tasks: ${error}`.red);
+                throw error;
             }
         });
     }
@@ -174,6 +176,18 @@ class TodoistTaskManager {
         }
         console.log(`Time entries: ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta);
         return timeEntries;
+    }
+    closeTask(task) {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                yield todoist.closeTask(task.id);
+                console.log(`Successfully closed task: ${task.content}`.green);
+            }
+            catch (error) {
+                console.error(`Error closing task: ${error}`.red);
+                throw error;
+            }
+        });
     }
 }
 exports.TodoistTaskManager = TodoistTaskManager;

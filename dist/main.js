@@ -18,7 +18,7 @@ function main() {
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
         const todoistProjectManager = new todoist_1.TodoistProjectManager();
         // Fetch Todoist tasks, then their associated project ids and project names.
-        yield todoistTaskManager.fetchTasks();
+        yield todoistTaskManager.fetchTasks("today & !#Habits & !#Subscriptions & !/Meetings");
         todoistTaskManager.logTasks();
         const todoistProjectIds = todoistTaskManager.getTaskProjectIds();
         const todoistProjectNames = yield todoistProjectManager.getTaskProjectNames(todoistProjectIds);
@@ -54,9 +54,6 @@ function main() {
                             const existingEntryDate = new Date(existing.timeInterval.start);
                             const timeEntryDate = new Date(timeEntry.start);
                             matchingStartTime = (0, utility_1.compareTimes)(existingEntryDate, timeEntryDate);
-                        }
-                        if (matchingStartTime) {
-                            console.log(`Matching start time! ${existing.timeInterval.start}`.bgRed);
                         }
                         if (timeEntry.description === existing.description &&
                             matchingStartTime) {
