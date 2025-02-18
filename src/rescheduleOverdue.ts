@@ -4,7 +4,7 @@ import { TodoistTaskManager } from "./todoist";
 async function rescheduleOverdue() {
   const todoistTaskManager = new TodoistTaskManager();
   const overdueTasks = await todoistTaskManager.fetchTasks(
-    "overdue & !#Habits & !#Subscriptions"
+    "overdue & !#Subscriptions & !/Weekly"
   );
   const taskIds = overdueTasks.results.map((task) => task.id);
   await todoistTaskManager.rescheduleTasks(taskIds, "today");
