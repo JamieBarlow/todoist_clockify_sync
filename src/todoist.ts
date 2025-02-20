@@ -15,6 +15,7 @@ import {
   GetTasksArgs,
   UpdateTaskArgs,
   DueDate,
+  Label,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
 
@@ -113,7 +114,7 @@ export class TodoistTaskManager {
 
   // Calculates start and end times from the Todoist task's datetime value. Allows for conversion to Clockify tasks
   getTaskTiming(task: Task) {
-    if (task.duration && task.due) {
+    if (task.duration && task.due && task.due.datetime) {
       const duration = task.duration?.amount;
       const startTime = new Date(`${task.due?.datetime}`).toISOString();
       const endTime = new Date(startTime);
@@ -199,6 +200,23 @@ export class TodoistTaskManager {
     }
   }
 
+  async removeLabels(task: Task, toRemove: string): Promise<void> {
+    const { id, labels } = task;
+    const filteredLabels = labels.filter((label) => label !== toRemove);
+    try {
+      await todoist.updateTask(id, { labels: filteredLabels });
+      console.log(
+        `Successfully removed labels from task: ${task.content} Updated labels: ${task.labels}`
+          .green
+      );
+    } catch (error) {
+      console.error(
+        `Error updating task: ${error}. Labels: ${task.labels} `.red
+      );
+    }
+  }
+
+  // Allows you to reschedule a task/tasks to a given due date, defined by dueString
   async rescheduleTasks(
     taskId: string | string[],
     dueString: string

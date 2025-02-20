@@ -115,7 +115,7 @@ class TodoistTaskManager {
     // Calculates start and end times from the Todoist task's datetime value. Allows for conversion to Clockify tasks
     getTaskTiming(task) {
         var _a, _b;
-        if (task.duration && task.due) {
+        if (task.duration && task.due && task.due.datetime) {
             const duration = (_a = task.duration) === null || _a === void 0 ? void 0 : _a.amount;
             const startTime = new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`).toISOString();
             const endTime = new Date(startTime);
@@ -189,16 +189,29 @@ class TodoistTaskManager {
             }
         });
     }
+    removeLabels(task, toRemove) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { id, labels } = task;
+            const filteredLabels = labels.filter((label) => label !== toRemove);
+            try {
+                yield todoist.updateTask(id, { labels: filteredLabels });
+                console.log(`Successfully removed labels from task: ${task.content} Updated labels: ${task.labels}`
+                    .green);
+            }
+            catch (error) {
+                console.error(`Error updating task: ${error}. Labels: ${task.labels} `.red);
+            }
+        });
+    }
+    // Allows you to reschedule a task/tasks to a given due date, defined by dueString
     rescheduleTasks(taskId, dueString) {
         return __awaiter(this, void 0, void 0, function* () {
             // Ensure input is in an array (even if single value) - allows for single or multiple values
             const taskIds = Array.isArray(taskId) ? taskId : [taskId];
-            console.log(`Task IDs: ${JSON.stringify(taskIds)}`);
             try {
                 yield Promise.all(taskIds.map((id) => __awaiter(this, void 0, void 0, function* () {
                     yield todoist.updateTask(id, { dueString });
-                    console.log(`Task rescheduled successfully: ${id}} rescheduled from ${dueString}`
-                        .green);
+                    console.log(`Task rescheduled successfully: ${id}}`.green);
                 })));
             }
             catch (error) {

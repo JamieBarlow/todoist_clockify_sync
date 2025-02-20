@@ -8,6 +8,8 @@ async function closeTasks() {
   );
   const tasks = todoistTaskManager.getTasks();
   tasks.forEach((task) => {
+    // Remove 'Done' label to account for recurring tasks
+    todoistTaskManager.removeLabels(task, "Done");
     todoistTaskManager.closeTask(task);
   });
 }

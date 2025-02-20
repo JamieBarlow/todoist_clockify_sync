@@ -14,7 +14,7 @@ const todoist_1 = require("./todoist");
 function rescheduleOverdue() {
     return __awaiter(this, void 0, void 0, function* () {
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
-        const overdueTasks = yield todoistTaskManager.fetchTasks("overdue & !#Habits & !#Subscriptions");
+        const overdueTasks = yield todoistTaskManager.fetchTasks("overdue & !#Subscriptions & !/Weekly");
         const taskIds = overdueTasks.results.map((task) => task.id);
         yield todoistTaskManager.rescheduleTasks(taskIds, "today");
     });
