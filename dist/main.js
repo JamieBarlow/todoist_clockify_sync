@@ -17,8 +17,9 @@ function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
         const todoistProjectManager = new todoist_1.TodoistProjectManager();
-        // Fetch Todoist tasks, then their associated project ids and project names.
+        // Fetch Todoist tasks, then their associated project ids and project names. Excludes items in Habits or Subscriptions projects, since these are not scheduled tasks, as well as items in the /Meetings section since these are already present in Clockify
         yield todoistTaskManager.fetchTasks("today & !#Habits & !#Subscriptions & !/Meetings");
+        // todoistTaskManager.removeFutureTasks();
         todoistTaskManager.logTasks();
         const todoistProjectIds = todoistTaskManager.getTaskProjectIds();
         const todoistProjectNames = yield todoistProjectManager.getTaskProjectNames(todoistProjectIds);

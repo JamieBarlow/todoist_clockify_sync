@@ -14,6 +14,7 @@ require("dotenv/config");
 require("colors");
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY;
 const todoist_api_typescript_1 = require("@doist/todoist-api-typescript");
+const utility_1 = require("./utility");
 if (!TODOIST_API_KEY) {
     throw new Error("Missing TODOIST_API_KEY in environment variables");
 }
@@ -176,6 +177,16 @@ class TodoistTaskManager {
         }
         console.log(`Time entries: ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta);
         return timeEntries;
+    }
+    removeFutureTasks() {
+        this.tasks = this.tasks.filter((task) => {
+            var _a;
+            const now = new Date();
+            if (!((_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime))
+                return true; // Keep tasks without a due date
+            const taskDue = new Date(task.due.datetime);
+            return !(0, utility_1.isAfter)(taskDue, now);
+        });
     }
     closeTask(task) {
         return __awaiter(this, void 0, void 0, function* () {

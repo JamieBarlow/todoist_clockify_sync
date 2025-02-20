@@ -18,6 +18,7 @@ import {
   Label,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
+import { isAfter } from "./utility";
 
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
@@ -188,6 +189,15 @@ export class TodoistTaskManager {
       `Time entries: ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta
     );
     return timeEntries;
+  }
+
+  removeFutureTasks() {
+    this.tasks = this.tasks.filter((task) => {
+      const now = new Date();
+      if (!task.due?.datetime) return true; // Keep tasks without a due date
+      const taskDue = new Date(task.due.datetime);
+      return !isAfter(taskDue, now);
+    });
   }
 
   async closeTask(task: Task): Promise<void> {
