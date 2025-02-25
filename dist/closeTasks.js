@@ -10,11 +10,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const todoist_1 = require("./todoist");
-// Close all scheduled tasks with a 'Done' tag
+// Close all scheduled tasks with a 'Done' tag. Also close any meetings which are in the past, even if no 'Done' label is present
 function closeTasks() {
     return __awaiter(this, void 0, void 0, function* () {
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
-        yield todoistTaskManager.fetchTasks("today & !#Habits & !#Subscriptions & @Done & !(no time)");
+        yield todoistTaskManager.fetchTasks("today & (!#Habits & !#Subscriptions & @Done & !(no time) | /Meetings)");
+        todoistTaskManager.removeFutureTasks();
         const tasks = todoistTaskManager.getTasks();
         tasks.forEach((task) => {
             // Remove 'Done' label to account for recurring tasks
