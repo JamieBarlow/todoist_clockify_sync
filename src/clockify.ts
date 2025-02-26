@@ -72,7 +72,7 @@ export interface NewTimeEntry {
   type: "REGULAR" | "BREAK";
 }
 
-interface FetchedTimeEntry {
+export interface FetchedTimeEntry {
   billable: boolean;
   costRate: {};
   customFieldValues: [];

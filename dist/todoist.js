@@ -134,7 +134,7 @@ class TodoistTaskManager {
             };
         }
     }
-    createTask(taskOrTasks) {
+    createTasks(taskOrTasks) {
         return __awaiter(this, void 0, void 0, function* () {
             // Ensure input is in an array (even if single value)
             const tasks = Array.isArray(taskOrTasks) ? taskOrTasks : [taskOrTasks];

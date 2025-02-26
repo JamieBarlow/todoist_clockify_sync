@@ -43,7 +43,7 @@ function main() {
         });
         const timeEntries = todoistTaskManager.formatTasksForClockify(projectIds);
         // Filter out duplicate entries (i.e. any time entries already present in Clockify)
-        function filterDuplicates() {
+        function filterClockifyDuplicates() {
             return __awaiter(this, void 0, void 0, function* () {
                 const userId = yield clockifyManager.fetchUserId(workspaceId);
                 const existingTimeEntries = yield clockifyManager.fetchTodayTimeEntries(workspaceId, userId);
@@ -76,7 +76,7 @@ function main() {
                 return filtered;
             });
         }
-        const filteredTimeEntries = yield filterDuplicates();
+        const filteredTimeEntries = yield filterClockifyDuplicates();
         if (workspaceId) {
             for (const timeEntry of filteredTimeEntries) {
                 clockifyManager.addTimeEntry(workspaceId, timeEntry);

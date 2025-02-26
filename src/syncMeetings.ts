@@ -1,5 +1,7 @@
-import { ClockifyManager } from "./clockify";
+import { ClockifyManager, FetchedTimeEntry } from "./clockify";
 import { TodoistProjectManager, TodoistTaskManager } from "./todoist";
+import { AddTaskArgs, Task } from "@doist/todoist-api-typescript";
+import { compareTimes } from "./utility";
 
 // Fetches new Clockify time entries and creates matching Todoist tasks (as meetings)
 async function syncMeetingsToTasks() {
@@ -12,12 +14,9 @@ async function syncMeetingsToTasks() {
     workspaceId,
     userId
   );
-  // Avoids re-posting items to Todoist that have already been synced from Todoist -> Clockify
-  timeEntries = clockifyManager.excludePastEntries(timeEntries);
-  // Populate Todoist from time entries
+  timeEntries = clockifyManager.excludePastEntries(timeEntries); // Avoids re-posting items to Todoist that have already been synced from Todoist -> Clockify
   const todoistProjectManager = new TodoistProjectManager();
   const projects = await todoistProjectManager.fetchProjects();
-  // Using "Work Admin" project and "Meetings" section
   const workAdminProject = projects.results.find((project) => {
     return project.name === "Work Admin";
   });
@@ -37,13 +36,39 @@ async function syncMeetingsToTasks() {
   };
   const ids = await fetchIds();
   const { workAdminProjectId, meetingsSectionId } = ids;
-  const tasks = clockifyManager.formatForTodoist(
-    timeEntries,
+
+  // Get existing Todoist tasks
+  const todoistTaskManager = new TodoistTaskManager();
+  await todoistTaskManager.fetchTasks("today");
+  const existingTasks = todoistTaskManager.getTasks();
+
+  function filterTodoistDuplicates(
+    existingTasks: Task[],
+    timeEntries: FetchedTimeEntry[]
+  ) {
+    const filteredTasks = timeEntries.filter((newTask) => {
+      const newTaskTime = new Date(`${newTask.timeInterval.start}`);
+      const matchingTime = existingTasks.find((task) => {
+        const taskTime = new Date(`${task.due?.datetime}`);
+        return compareTimes(taskTime, newTaskTime);
+      });
+      if (matchingTime) {
+        console.log(`Duplicate found: ${matchingTime.content}`.bgRed);
+        return false;
+      } else {
+        console.log(`New task added: ${newTask}`.bgGreen);
+        return true;
+      }
+    });
+    return filteredTasks;
+  }
+  const filteredTasks = filterTodoistDuplicates(existingTasks, timeEntries);
+  const newTasks = clockifyManager.formatForTodoist(
+    filteredTasks,
     workAdminProjectId,
     meetingsSectionId
   );
   // Add meetings as Todoist tasks
-  const todoistTaskManager = new TodoistTaskManager();
-  await todoistTaskManager.createTask(tasks);
+  await todoistTaskManager.createTasks(newTasks);
 }
 syncMeetingsToTasks();

@@ -37,7 +37,7 @@ async function main() {
   const timeEntries = todoistTaskManager.formatTasksForClockify(projectIds);
 
   // Filter out duplicate entries (i.e. any time entries already present in Clockify)
-  async function filterDuplicates() {
+  async function filterClockifyDuplicates() {
     const userId = await clockifyManager.fetchUserId(workspaceId);
     const existingTimeEntries = await clockifyManager.fetchTodayTimeEntries(
       workspaceId,
@@ -71,7 +71,7 @@ async function main() {
     });
     return filtered;
   }
-  const filteredTimeEntries = await filterDuplicates();
+  const filteredTimeEntries = await filterClockifyDuplicates();
 
   if (workspaceId) {
     for (const timeEntry of filteredTimeEntries) {

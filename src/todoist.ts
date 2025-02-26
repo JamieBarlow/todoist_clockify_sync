@@ -133,7 +133,7 @@ export class TodoistTaskManager {
     }
   }
 
-  async createTask(
+  async createTasks(
     taskOrTasks: AddTaskArgsExtended | AddTaskArgsExtended[]
   ): Promise<void> {
     // Ensure input is in an array (even if single value)
