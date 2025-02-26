@@ -3,6 +3,7 @@ import "colors";
 import { StringMappingType } from "typescript";
 import { compareDates, isAfter } from "./utility";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
+import { endOfDay, formatISO, startOfDay } from "date-fns";
 
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 
@@ -172,13 +173,20 @@ export class ClockifyManager {
     return "";
   }
 
-  async fetchAllTimeEntries(
+  // Fetch time entries within (optionally) a date range, defined by 'start' and 'end' params
+  async fetchTimeEntries(
     workspaceId: string,
-    userId: string
+    userId: string,
+    start?: string,
+    end?: string
   ): Promise<FetchedTimeEntry[]> {
+    const queryParams = new URLSearchParams();
+    if (start) queryParams.append("start", start);
+    if (end) queryParams.append("end", end);
     try {
       const response = await fetch(
-        `https://api.clockify.me/api/v1/workspaces/${workspaceId}/user/${userId}/time-entries`,
+        `https://api.clockify.me/api/v1/workspaces/${workspaceId}/user/${userId}/time-entries` +
+          (queryParams.toString() ? `?${queryParams.toString()}` : ""),
         { method: "GET", headers: headers }
       );
       if (!response.ok) {
@@ -196,14 +204,15 @@ export class ClockifyManager {
     workspaceId: string,
     userId: string
   ): Promise<FetchedTimeEntry[]> {
-    const timeEntries = await this.fetchAllTimeEntries(workspaceId, userId);
-    const today = new Date();
-    const todayEntries = timeEntries.filter((entry) => {
-      const date = new Date(`${entry.timeInterval.start}`);
-      return compareDates(today, date);
-    });
-    // console.log(`${JSON.stringify(todayEntries).bgWhite}`);
-    return todayEntries;
+    const start = formatISO(startOfDay(new Date()));
+    const end = formatISO(endOfDay(new Date()));
+    const timeEntries = await this.fetchTimeEntries(
+      workspaceId,
+      userId,
+      start,
+      end
+    );
+    return timeEntries;
   }
 
   // Useful method for ensuring syncMeetings script is only populating future entries

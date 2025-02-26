@@ -12,13 +12,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const todoist_1 = require("./todoist");
 const clockify_1 = require("./clockify");
 const utility_1 = require("./utility");
-// Populates Clockify time entries from Todoist tasks, while avoiding duplicate entries
+// Populates Clockify time entries from Todoist tasks (once their time is passed), while avoiding duplicate entries
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
         const todoistProjectManager = new todoist_1.TodoistProjectManager();
-        // Fetch Todoist tasks, then their associated project ids and project names. Excludes items in Habits or Subscriptions projects, since these are not scheduled tasks, as well as items in the /Meetings section since these are already present in Clockify
-        yield todoistTaskManager.fetchTasks("today & !#Habits & !#Subscriptions & !/Meetings");
+        // Fetch Todoist tasks, then their associated project ids and project names. Excludes items in Habits or Subscriptions projects, since these are not scheduled tasks
+        yield todoistTaskManager.fetchTasks("today & !#Habits & !#Subscriptions");
         todoistTaskManager.removeFutureTasks();
         todoistTaskManager.logTasks();
         const todoistProjectIds = todoistTaskManager.getTaskProjectIds();

@@ -50,13 +50,9 @@ function syncMeetingsToTasks() {
         function filterTodoistDuplicates(existingTasks, timeEntries) {
             const filteredTasks = timeEntries.filter((newTask) => {
                 const newTaskTime = new Date(`${newTask.timeInterval.start}`);
-                console.log(`New task time for ${newTask.description}: ${newTask.timeInterval.start}`
-                    .bgMagenta);
                 const matchingTime = existingTasks.find((task) => {
-                    var _a, _b;
+                    var _a;
                     const taskTime = new Date(`${(_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime}`);
-                    console.log(`Existing task time for ${task.content}: ${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`
-                        .bgMagenta);
                     return (0, utility_1.compareTimes)(taskTime, newTaskTime);
                 });
                 if (matchingTime) {

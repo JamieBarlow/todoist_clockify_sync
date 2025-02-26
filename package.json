@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@doist/todoist-api-typescript": "^4.0.0-alpha.2",
+    "date-fns": "^4.1.0",
     "dotenv": "^16.4.7",
     "typescript": "^5.7.3"
   },

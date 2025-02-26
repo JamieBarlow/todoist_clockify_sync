@@ -2,14 +2,12 @@ import { TodoistTaskManager, TodoistProjectManager } from "./todoist";
 import { ClockifyManager } from "./clockify";
 import { compareTimes } from "./utility";
 
-// Populates Clockify time entries from Todoist tasks, while avoiding duplicate entries
+// Populates Clockify time entries from Todoist tasks (once their time is passed), while avoiding duplicate entries
 async function main() {
   const todoistTaskManager = new TodoistTaskManager();
   const todoistProjectManager = new TodoistProjectManager();
-  // Fetch Todoist tasks, then their associated project ids and project names. Excludes items in Habits or Subscriptions projects, since these are not scheduled tasks, as well as items in the /Meetings section since these are already present in Clockify
-  await todoistTaskManager.fetchTasks(
-    "today & !#Habits & !#Subscriptions & !/Meetings"
-  );
+  // Fetch Todoist tasks, then their associated project ids and project names. Excludes items in Habits or Subscriptions projects, since these are not scheduled tasks
+  await todoistTaskManager.fetchTasks("today & !#Habits & !#Subscriptions");
   todoistTaskManager.removeFutureTasks();
   todoistTaskManager.logTasks();
   const todoistProjectIds = todoistTaskManager.getTaskProjectIds();

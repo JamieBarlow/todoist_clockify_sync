@@ -13,6 +13,7 @@ exports.ClockifyManager = void 0;
 require("dotenv/config");
 require("colors");
 const utility_1 = require("./utility");
+const date_fns_1 = require("date-fns");
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 if (!CLOCKIFY_API_KEY) {
     throw new Error("Missing CLOCKIFY_API_KEY in environment variables");
@@ -84,10 +85,17 @@ class ClockifyManager {
             return "";
         });
     }
-    fetchAllTimeEntries(workspaceId, userId) {
+    // Fetch time entries within (optionally) a date range, defined by 'start' and 'end' params
+    fetchTimeEntries(workspaceId, userId, start, end) {
         return __awaiter(this, void 0, void 0, function* () {
+            const queryParams = new URLSearchParams();
+            if (start)
+                queryParams.append("start", start);
+            if (end)
+                queryParams.append("end", end);
             try {
-                const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${workspaceId}/user/${userId}/time-entries`, { method: "GET", headers: headers });
+                const response = yield fetch(`https://api.clockify.me/api/v1/workspaces/${workspaceId}/user/${userId}/time-entries` +
+                    (queryParams.toString() ? `?${queryParams.toString()}` : ""), { method: "GET", headers: headers });
                 if (!response.ok) {
                     throw new Error(`Failed to fetch time entries: ${response.statusText}`);
                 }
@@ -102,14 +110,10 @@ class ClockifyManager {
     }
     fetchTodayTimeEntries(workspaceId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
-            const timeEntries = yield this.fetchAllTimeEntries(workspaceId, userId);
-            const today = new Date();
-            const todayEntries = timeEntries.filter((entry) => {
-                const date = new Date(`${entry.timeInterval.start}`);
-                return (0, utility_1.compareDates)(today, date);
-            });
-            // console.log(`${JSON.stringify(todayEntries).bgWhite}`);
-            return todayEntries;
+            const start = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)(new Date()));
+            const end = (0, date_fns_1.formatISO)((0, date_fns_1.endOfDay)(new Date()));
+            const timeEntries = yield this.fetchTimeEntries(workspaceId, userId, start, end);
+            return timeEntries;
         });
     }
     // Useful method for ensuring syncMeetings script is only populating future entries
