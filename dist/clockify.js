@@ -112,6 +112,14 @@ class ClockifyManager {
             return todayEntries;
         });
     }
+    // Useful method for ensuring syncMeetings script is only populating future entries
+    excludePastEntries(timeEntries) {
+        return timeEntries.filter((entry) => {
+            const start = new Date(`${entry.timeInterval.start}`);
+            const now = new Date();
+            return (0, utility_1.isAfter)(start, now);
+        });
+    }
     // Takes in fetched Clockify time entries and formats for Todoist tasks
     formatForTodoist(timeEntries, projectId, sectionId) {
         const tasks = [];

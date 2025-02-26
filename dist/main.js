@@ -12,7 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const todoist_1 = require("./todoist");
 const clockify_1 = require("./clockify");
 const utility_1 = require("./utility");
-// Runs script
+// Populates Clockify time entries from Todoist tasks, while avoiding duplicate entries
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         const todoistTaskManager = new todoist_1.TodoistTaskManager();

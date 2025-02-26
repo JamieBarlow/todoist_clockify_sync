@@ -8,10 +8,12 @@ async function syncMeetingsToTasks() {
   await clockifyManager.fetchClockifyWorkspaces();
   const workspaceId = clockifyManager.getWorkspaceId();
   const userId = await clockifyManager.fetchUserId(workspaceId);
-  const timeEntries = await clockifyManager.fetchTodayTimeEntries(
+  let timeEntries = await clockifyManager.fetchTodayTimeEntries(
     workspaceId,
     userId
   );
+  // Avoids re-posting items to Todoist that have already been synced from Todoist -> Clockify
+  timeEntries = clockifyManager.excludePastEntries(timeEntries);
   // Populate Todoist from time entries
   const todoistProjectManager = new TodoistProjectManager();
   const projects = await todoistProjectManager.fetchProjects();

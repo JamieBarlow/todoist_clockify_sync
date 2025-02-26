@@ -2,7 +2,7 @@ import { TodoistTaskManager, TodoistProjectManager } from "./todoist";
 import { ClockifyManager } from "./clockify";
 import { compareTimes } from "./utility";
 
-// Runs script
+// Populates Clockify time entries from Todoist tasks, while avoiding duplicate entries
 async function main() {
   const todoistTaskManager = new TodoistTaskManager();
   const todoistProjectManager = new TodoistProjectManager();

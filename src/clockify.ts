@@ -1,7 +1,7 @@
 import "dotenv/config";
 import "colors";
 import { StringMappingType } from "typescript";
-import { compareDates } from "./utility";
+import { compareDates, isAfter } from "./utility";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
@@ -204,6 +204,15 @@ export class ClockifyManager {
     });
     // console.log(`${JSON.stringify(todayEntries).bgWhite}`);
     return todayEntries;
+  }
+
+  // Useful method for ensuring syncMeetings script is only populating future entries
+  excludePastEntries(timeEntries: FetchedTimeEntry[]): FetchedTimeEntry[] {
+    return timeEntries.filter((entry) => {
+      const start = new Date(`${entry.timeInterval.start}`);
+      const now = new Date();
+      return isAfter(start, now);
+    });
   }
 
   // Takes in fetched Clockify time entries and formats for Todoist tasks

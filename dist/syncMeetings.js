@@ -19,7 +19,9 @@ function syncMeetingsToTasks() {
         yield clockifyManager.fetchClockifyWorkspaces();
         const workspaceId = clockifyManager.getWorkspaceId();
         const userId = yield clockifyManager.fetchUserId(workspaceId);
-        const timeEntries = yield clockifyManager.fetchTodayTimeEntries(workspaceId, userId);
+        let timeEntries = yield clockifyManager.fetchTodayTimeEntries(workspaceId, userId);
+        // Avoids re-posting items to Todoist that have already been synced from Todoist -> Clockify
+        timeEntries = clockifyManager.excludePastEntries(timeEntries);
         // Populate Todoist from time entries
         const todoistProjectManager = new todoist_1.TodoistProjectManager();
         const projects = yield todoistProjectManager.fetchProjects();

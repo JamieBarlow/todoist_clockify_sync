@@ -1,6 +1,6 @@
 import { TodoistTaskManager } from "./todoist";
 
-// Close all scheduled tasks with a 'Done' tag. Also close any meetings which are in the past, even if no 'Done' label is present
+// Close all scheduled tasks with a 'Done' tag which are in the past. Also close any meetings which are in the past, even if no 'Done' label is present
 async function closeTasks() {
   const todoistTaskManager = new TodoistTaskManager();
   await todoistTaskManager.fetchTasks(
