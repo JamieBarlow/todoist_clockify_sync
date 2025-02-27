@@ -85,7 +85,7 @@ class ClockifyManager {
             return "";
         });
     }
-    // Fetch time entries within (optionally) a date range, defined by 'start' and 'end' params
+    // Fetch time entries within (optionally) a date range, defined by 'start' and 'end' params.
     fetchTimeEntries(workspaceId, userId, start, end) {
         return __awaiter(this, void 0, void 0, function* () {
             const queryParams = new URLSearchParams();
@@ -112,6 +112,14 @@ class ClockifyManager {
         return __awaiter(this, void 0, void 0, function* () {
             const start = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)(new Date()));
             const end = (0, date_fns_1.formatISO)((0, date_fns_1.endOfDay)(new Date()));
+            const timeEntries = yield this.fetchTimeEntries(workspaceId, userId, start, end);
+            return timeEntries;
+        });
+    }
+    fetchWeeklyTimeEntries(workspaceId, userId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const start = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)(new Date()));
+            const end = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)((0, date_fns_1.addDays)(new Date(), 5)));
             const timeEntries = yield this.fetchTimeEntries(workspaceId, userId, start, end);
             return timeEntries;
         });

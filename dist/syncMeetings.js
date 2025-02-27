@@ -20,7 +20,7 @@ function syncMeetingsToTasks() {
         yield clockifyManager.fetchClockifyWorkspaces();
         const workspaceId = clockifyManager.getWorkspaceId();
         const userId = yield clockifyManager.fetchUserId(workspaceId);
-        let timeEntries = yield clockifyManager.fetchTodayTimeEntries(workspaceId, userId);
+        let timeEntries = yield clockifyManager.fetchWeeklyTimeEntries(workspaceId, userId);
         timeEntries = clockifyManager.excludePastEntries(timeEntries); // Avoids re-posting items to Todoist that have already been synced from Todoist -> Clockify
         const todoistProjectManager = new todoist_1.TodoistProjectManager();
         const projects = yield todoistProjectManager.fetchProjects();
@@ -43,16 +43,42 @@ function syncMeetingsToTasks() {
         });
         const ids = yield fetchIds();
         const { workAdminProjectId, meetingsSectionId } = ids;
-        // Get existing Todoist tasks
+        // Get existing scheduled Todoist tasks. Fetch requests broken into smaller chunks due to 50 item Todoist API limit
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
-        yield todoistTaskManager.fetchTasks("today");
-        const existingTasks = todoistTaskManager.getTasks();
+        const days = ["today", "tomorrow", "3 days", "4 days", "5 days"];
+        let existingTasks = [];
+        let exclusions = ["!no date & !no time"];
+        for (const day of days) {
+            const filter = `${exclusions.join(" & ")} & ${day}`;
+            yield todoistTaskManager.fetchTasks(filter);
+            existingTasks = existingTasks.concat(todoistTaskManager.getTasks());
+            // Add the day to exclusions for the next iteration
+            exclusions.push(`!${day}`);
+        }
+        console.log(`Total fetched tasks: ${existingTasks.length}`);
+        // await todoistTaskManager.fetchTasks("!no date & !no time & today");
+        // let existingTasks = todoistTaskManager.getTasks();
+        // await todoistTaskManager.fetchTasks("!no date & !no time & tomorrow");
+        // existingTasks = existingTasks.concat(todoistTaskManager.getTasks());
+        // await todoistTaskManager.fetchTasks(
+        //   "!no date & !no time & !today & !tomorrow & 3 days"
+        // );
+        // existingTasks = existingTasks.concat(todoistTaskManager.getTasks());
+        // await todoistTaskManager.fetchTasks(
+        //   "!no date & !no time & !today & !tomorrow & !3 days & 4 days"
+        // );
+        // existingTasks = existingTasks.concat(todoistTaskManager.getTasks());
+        // await todoistTaskManager.fetchTasks(
+        //   "!no date & !no time & !today & !tomorrow & !3 days & !4 days & 5 days"
+        // );
+        // existingTasks = existingTasks.concat(todoistTaskManager.getTasks());
         function filterTodoistDuplicates(existingTasks, timeEntries) {
             const filteredTasks = timeEntries.filter((newTask) => {
                 const newTaskTime = new Date(`${newTask.timeInterval.start}`);
                 const matchingTime = existingTasks.find((task) => {
                     var _a;
                     const taskTime = new Date(`${(_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime}`);
+                    // console.log(`${task.content}:${task.due?.datetime}`.bgMagenta);
                     return (0, utility_1.compareTimes)(taskTime, newTaskTime);
                 });
                 if (matchingTime) {
@@ -60,7 +86,7 @@ function syncMeetingsToTasks() {
                     return false;
                 }
                 else {
-                    console.log(`New task added: ${newTask}`.bgGreen);
+                    console.log(`New task added: ${newTask.timeInterval.start}`.bgGreen);
                     return true;
                 }
             });

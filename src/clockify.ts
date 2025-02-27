@@ -3,7 +3,7 @@ import "colors";
 import { StringMappingType } from "typescript";
 import { compareDates, isAfter } from "./utility";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
-import { endOfDay, formatISO, startOfDay } from "date-fns";
+import { addDays, endOfDay, formatISO, startOfDay } from "date-fns";
 
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 
@@ -173,7 +173,7 @@ export class ClockifyManager {
     return "";
   }
 
-  // Fetch time entries within (optionally) a date range, defined by 'start' and 'end' params
+  // Fetch time entries within (optionally) a date range, defined by 'start' and 'end' params.
   async fetchTimeEntries(
     workspaceId: string,
     userId: string,
@@ -206,6 +206,21 @@ export class ClockifyManager {
   ): Promise<FetchedTimeEntry[]> {
     const start = formatISO(startOfDay(new Date()));
     const end = formatISO(endOfDay(new Date()));
+    const timeEntries = await this.fetchTimeEntries(
+      workspaceId,
+      userId,
+      start,
+      end
+    );
+    return timeEntries;
+  }
+
+  async fetchWeeklyTimeEntries(
+    workspaceId: string,
+    userId: string
+  ): Promise<FetchedTimeEntry[]> {
+    const start = formatISO(startOfDay(new Date()));
+    const end = formatISO(startOfDay(addDays(new Date(), 5)));
     const timeEntries = await this.fetchTimeEntries(
       workspaceId,
       userId,

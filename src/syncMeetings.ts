@@ -10,7 +10,7 @@ async function syncMeetingsToTasks() {
   await clockifyManager.fetchClockifyWorkspaces();
   const workspaceId = clockifyManager.getWorkspaceId();
   const userId = await clockifyManager.fetchUserId(workspaceId);
-  let timeEntries = await clockifyManager.fetchTodayTimeEntries(
+  let timeEntries = await clockifyManager.fetchWeeklyTimeEntries(
     workspaceId,
     userId
   );
@@ -37,10 +37,20 @@ async function syncMeetingsToTasks() {
   const ids = await fetchIds();
   const { workAdminProjectId, meetingsSectionId } = ids;
 
-  // Get existing Todoist tasks
+  // Get existing scheduled Todoist tasks over subsequent days. Fetch requests broken into smaller chunks due to 50 item Todoist API limit
   const todoistTaskManager = new TodoistTaskManager();
-  await todoistTaskManager.fetchTasks("today");
-  const existingTasks = todoistTaskManager.getTasks();
+  const days = ["today", "tomorrow", "3 days", "4 days", "5 days"];
+  let existingTasks: Task[] = [];
+  let exclusions: string[] = ["!no date & !no time"];
+  for (const day of days) {
+    const filter = `${exclusions.join(" & ")} & ${day}`;
+    await todoistTaskManager.fetchTasks(filter);
+    existingTasks = existingTasks.concat(todoistTaskManager.getTasks());
+
+    // Add the day to exclusions for the next iteration
+    exclusions.push(`!${day}`);
+  }
+  console.log(`Total fetched tasks: ${existingTasks.length}`);
 
   function filterTodoistDuplicates(
     existingTasks: Task[],
@@ -50,13 +60,14 @@ async function syncMeetingsToTasks() {
       const newTaskTime = new Date(`${newTask.timeInterval.start}`);
       const matchingTime = existingTasks.find((task) => {
         const taskTime = new Date(`${task.due?.datetime}`);
+        // console.log(`${task.content}:${task.due?.datetime}`.bgMagenta);
         return compareTimes(taskTime, newTaskTime);
       });
       if (matchingTime) {
         console.log(`Duplicate found: ${matchingTime.content}`.bgRed);
         return false;
       } else {
-        console.log(`New task added: ${newTask}`.bgGreen);
+        console.log(`New task added: ${newTask.timeInterval.start}`.bgGreen);
         return true;
       }
     });
