@@ -215,14 +215,18 @@ class TodoistTaskManager {
         });
     }
     // Allows you to reschedule a task/tasks to a given due date, defined by dueString
-    rescheduleTasks(taskId, dueString) {
+    rescheduleTasks(tasks, dueString) {
         return __awaiter(this, void 0, void 0, function* () {
             // Ensure input is in an array (even if single value) - allows for single or multiple values
-            const taskIds = Array.isArray(taskId) ? taskId : [taskId];
+            const taskList = Array.isArray(tasks) ? tasks : [tasks];
             try {
-                yield Promise.all(taskIds.map((id) => __awaiter(this, void 0, void 0, function* () {
-                    yield todoist.updateTask(id, { dueString });
-                    console.log(`Task rescheduled successfully: ${id}}`.green);
+                yield Promise.all(taskList.map((task) => __awaiter(this, void 0, void 0, function* () {
+                    var _a;
+                    const due = ((_a = task.due) === null || _a === void 0 ? void 0 : _a.isRecurring)
+                        ? `${task.due.string} starting ${dueString}`
+                        : "today";
+                    yield todoist.updateTask(task.id, { dueString: due });
+                    console.log(`Task rescheduled successfully: ${task.id}}`.green);
                 })));
             }
             catch (error) {

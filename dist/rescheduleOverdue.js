@@ -10,13 +10,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const todoist_1 = require("./todoist");
-// Reschedules overdue Todoist tasks to today's date (without a start time)
+// Reschedules overdue Todoist tasks to today's date (without a start time). Note: handles daily recurring tasks but currently excludes weekly items since these will need rescheduling to a future week
 function rescheduleOverdue() {
     return __awaiter(this, void 0, void 0, function* () {
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
-        const overdueTasks = yield todoistTaskManager.fetchTasks("overdue & !#Subscriptions & !/Weekly");
-        const taskIds = overdueTasks.results.map((task) => task.id);
-        yield todoistTaskManager.rescheduleTasks(taskIds, "today");
+        yield todoistTaskManager.fetchTasks("overdue & !#Subscriptions & !/Weekly");
+        const overdueTasks = todoistTaskManager.getTasks();
+        yield todoistTaskManager.rescheduleTasks(overdueTasks, "today");
     });
 }
 rescheduleOverdue();
