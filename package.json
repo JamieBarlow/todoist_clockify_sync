@@ -13,7 +13,8 @@
     "build": "npx tsc",
     "tasksToTime": "npm run build && node dist/tasksToTimeEntries.js",
     "timeToTasks": "npm run build && node dist/timeEntriesToTasks.js",
-    "close-tasks": "npm run build && node dist/closeTasks.js",
+    "closeTasks": "npm run build && node dist/closeTasks.js --sync",
+    "closeTasks-nosync": "npm run build && node dist/closeTasks.js",
     "reschedule": "npm run build && node dist/rescheduleOverdue.js"
   }
 }

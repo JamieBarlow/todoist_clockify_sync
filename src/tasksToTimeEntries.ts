@@ -3,7 +3,7 @@ import { ClockifyManager } from "./clockify";
 import { compareTimes } from "./utility";
 
 // Populates Clockify time entries from Todoist tasks (once their time is passed), while avoiding duplicate entries
-async function tasksToTimeEntries() {
+export async function tasksToTimeEntries() {
   const todoistTaskManager = new TodoistTaskManager();
   const todoistProjectManager = new TodoistProjectManager();
   // Fetch Todoist tasks, then their associated project ids and project names. Excludes items in Habits or Subscriptions projects, since these are not scheduled tasks

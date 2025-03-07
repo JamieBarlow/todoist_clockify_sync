@@ -1,7 +1,5 @@
 name: Populates today's Clockify time entries from Todoist tasks (once their time is passed), while avoiding duplicate entries
 on:
-  schedule:
-    - cron: "20 9,13,17,21 * * *"
   workflow_dispatch:
 jobs:
   cron:
