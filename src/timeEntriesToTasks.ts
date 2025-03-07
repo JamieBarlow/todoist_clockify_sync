@@ -1,10 +1,10 @@
 import { ClockifyManager, FetchedTimeEntry } from "./clockify";
 import { TodoistProjectManager, TodoistTaskManager } from "./todoist";
-import { AddTaskArgs, Task } from "@doist/todoist-api-typescript";
+import { Task } from "@doist/todoist-api-typescript";
 import { compareTimes } from "./utility";
 
 // Fetches new Clockify time entries and creates matching Todoist tasks (as meetings)
-async function syncMeetingsToTasks() {
+async function timeEntriesToTasks() {
   // Fetch Clockify API data and use to get today's time entries
   const clockifyManager = new ClockifyManager();
   await clockifyManager.fetchClockifyWorkspaces();
@@ -82,4 +82,4 @@ async function syncMeetingsToTasks() {
   // Add meetings as Todoist tasks
   await todoistTaskManager.createTasks(newTasks);
 }
-syncMeetingsToTasks();
+timeEntriesToTasks();

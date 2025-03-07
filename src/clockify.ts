@@ -230,7 +230,7 @@ export class ClockifyManager {
     return timeEntries;
   }
 
-  // Useful method for ensuring syncMeetings script is only populating future entries
+  // Useful method for ensuring timeEntriesToTasks script is only populating future entries
   excludePastEntries(timeEntries: FetchedTimeEntry[]): FetchedTimeEntry[] {
     return timeEntries.filter((entry) => {
       const start = new Date(`${entry.timeInterval.start}`);

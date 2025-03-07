@@ -11,10 +11,8 @@
   },
   "scripts": {
     "build": "npx tsc",
-    "start-todoist": "npm run build && node dist/todoist.js",
-    "start-clockify": "npm run build && node dist/clockify.js",
-    "start": "npm run build && node dist/main.js",
-    "sync-meetings": "npm run build && node dist/syncMeetings.js",
+    "tasksToTime": "npm run build && node dist/tasksToTimeEntries.js",
+    "timeToTasks": "npm run build && node dist/timeEntriesToTasks.js",
     "close-tasks": "npm run build && node dist/closeTasks.js",
     "reschedule": "npm run build && node dist/rescheduleOverdue.js"
   }

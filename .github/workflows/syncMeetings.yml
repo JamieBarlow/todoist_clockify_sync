@@ -16,7 +16,7 @@ jobs:
       - name: Install dependencies (if needed)
         run: npm ci
       - name: Run the script
-        run: npm run sync-meetings
+        run: npm run timeToTasks
         env:
           TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
           CLOCKIFY_API_KEY: ${{ secrets.CLOCKIFY_API_KEY }}
