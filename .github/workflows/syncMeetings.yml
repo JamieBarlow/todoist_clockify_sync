@@ -1,7 +1,7 @@
-name: Populate Todoist scheduled tasks from Clockify Time Entries
+name: Populate Todoist scheduled tasks from any new Clockify Time Entries (for today and subsequent days), avoiding duplicates
 on:
   schedule:
-    - cron: "00 06 * * *"
+    - cron: "10 8,12,16,20 * * *"
   workflow_dispatch:
 jobs:
   cron:
