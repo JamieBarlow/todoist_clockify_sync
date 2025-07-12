@@ -141,19 +141,19 @@ class ClockifyManager {
         for (let i = 0; i < timeEntries.length; i++) {
             const { description, timeInterval } = timeEntries[i];
             // Formatting start date to submit as human defined time entry
-            const today = new Date();
-            const startTime = new Date(`${timeInterval.start}`);
+            const today = (0, utility_1.getZonedTime)(new Date());
+            const startTime = (0, utility_1.getZonedTime)(new Date(`${timeInterval.start}`));
             console.log(`formatForTodoist startTime: ${startTime}`);
-            const endTime = new Date(`${timeInterval.end}`);
+            const endTime = (0, utility_1.getZonedTime)(new Date(`${timeInterval.end}`));
             const dueString = (0, utility_1.compareDates)(today, startTime)
-                ? `today at ${startTime.toLocaleTimeString([], {
+                ? `today at ${startTime.toLocaleTimeString("en-GB", {
                     hour: "2-digit",
                     minute: "2-digit",
                 })}`
                 : `${startTime.toLocaleDateString("en-GB", {
                     day: "numeric",
                     month: "long",
-                })} at ${startTime.toLocaleTimeString([], {
+                })} at ${startTime.toLocaleTimeString("en-GB", {
                     hour: "2-digit",
                     minute: "2-digit",
                 })}`;
