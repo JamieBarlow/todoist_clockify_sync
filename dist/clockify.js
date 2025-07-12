@@ -110,6 +110,7 @@ class ClockifyManager {
     }
     fetchTodayTimeEntries(workspaceId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
+            // Defines today's date range for fetchTimeEntries()
             const start = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)(new Date()));
             const end = (0, date_fns_1.formatISO)((0, date_fns_1.endOfDay)(new Date()));
             const timeEntries = yield this.fetchTimeEntries(workspaceId, userId, start, end);
@@ -118,13 +119,15 @@ class ClockifyManager {
     }
     fetchWeeklyTimeEntries(workspaceId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
+            // Defines weekly date range for fetchTimeEntries()
             const start = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)(new Date()));
             const end = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)((0, date_fns_1.addDays)(new Date(), 5)));
+            console.log(`fetchWeeklyTimeEntries start of day: ${start}`);
             const timeEntries = yield this.fetchTimeEntries(workspaceId, userId, start, end);
             return timeEntries;
         });
     }
-    // Useful method for ensuring syncMeetings script is only populating future entries
+    // Useful method for ensuring timeEntriesToTasks script is only populating future entries
     excludePastEntries(timeEntries) {
         return timeEntries.filter((entry) => {
             const start = new Date(`${entry.timeInterval.start}`);
@@ -140,6 +143,7 @@ class ClockifyManager {
             // Formatting start date to submit as human defined time entry
             const today = new Date();
             const startTime = new Date(`${timeInterval.start}`);
+            console.log(`formatForTodoist startTime: ${startTime}`);
             const endTime = new Date(`${timeInterval.end}`);
             const dueString = (0, utility_1.compareDates)(today, startTime)
                 ? `today at ${startTime.toLocaleTimeString([], {

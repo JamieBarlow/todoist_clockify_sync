@@ -1,3 +1,5 @@
+import { utcToZonedTime } from "date-fns-tz";
+
 // Check for match between 2 dates (day/month/year)
 export const compareDates = (d1: Date, d2: Date): boolean => {
   if (
@@ -19,4 +21,10 @@ export const compareTimes = (d1: Date, d2: Date): boolean => {
 // Compares 2 dates/times, if d1 is later than d2 this will return true
 export const isAfter = (d1: Date, d2: Date): boolean => {
   return d1.getTime() > d2.getTime() ? true : false;
+};
+
+export const getZonedTime = (date: Date): Date => {
+  const timeZone = "Europe/London";
+  const day = utcToZonedTime(date, timeZone);
+  return day;
 };

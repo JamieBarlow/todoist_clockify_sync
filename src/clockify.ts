@@ -1,7 +1,7 @@
 import "dotenv/config";
 import "colors";
 import { StringMappingType } from "typescript";
-import { compareDates, isAfter } from "./utility";
+import { compareDates, isAfter, getZonedTime } from "./utility";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 import { addDays, endOfDay, formatISO, startOfDay } from "date-fns";
 
@@ -204,6 +204,7 @@ export class ClockifyManager {
     workspaceId: string,
     userId: string
   ): Promise<FetchedTimeEntry[]> {
+    // Defines today's date range for fetchTimeEntries()
     const start = formatISO(startOfDay(new Date()));
     const end = formatISO(endOfDay(new Date()));
     const timeEntries = await this.fetchTimeEntries(
@@ -219,8 +220,10 @@ export class ClockifyManager {
     workspaceId: string,
     userId: string
   ): Promise<FetchedTimeEntry[]> {
+    // Defines weekly date range for fetchTimeEntries()
     const start = formatISO(startOfDay(new Date()));
     const end = formatISO(startOfDay(addDays(new Date(), 5)));
+    console.log(`fetchWeeklyTimeEntries start of day: ${start}`);
     const timeEntries = await this.fetchTimeEntries(
       workspaceId,
       userId,
@@ -249,18 +252,19 @@ export class ClockifyManager {
     for (let i = 0; i < timeEntries.length; i++) {
       const { description, timeInterval } = timeEntries[i];
       // Formatting start date to submit as human defined time entry
-      const today = new Date();
-      const startTime = new Date(`${timeInterval.start}`);
-      const endTime = new Date(`${timeInterval.end}`);
+      const today = getZonedTime(new Date());
+      const startTime = getZonedTime(new Date(`${timeInterval.start}`));
+      console.log(`formatForTodoist startTime: ${startTime}`);
+      const endTime = getZonedTime(new Date(`${timeInterval.end}`));
       const dueString = compareDates(today, startTime)
-        ? `today at ${startTime.toLocaleTimeString([], {
+        ? `today at ${startTime.toLocaleTimeString("en-GB", {
             hour: "2-digit",
             minute: "2-digit",
           })}`
         : `${startTime.toLocaleDateString("en-GB", {
             day: "numeric",
             month: "long",
-          })} at ${startTime.toLocaleTimeString([], {
+          })} at ${startTime.toLocaleTimeString("en-GB", {
             hour: "2-digit",
             minute: "2-digit",
           })}`;
