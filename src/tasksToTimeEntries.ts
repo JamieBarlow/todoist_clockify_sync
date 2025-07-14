@@ -25,7 +25,6 @@ export async function tasksToTimeEntries() {
       return p.name === projectName;
     });
     if (projectMatch) {
-      console.log(`Match!! ${projectMatch.id}`);
       return projectMatch.id;
     } else {
       return "";
@@ -49,7 +48,9 @@ export async function tasksToTimeEntries() {
           const existingEntryDate = getZonedTime(
             new Date(existing.timeInterval.start)
           );
+          console.log(`Existing entry date: ${existingEntryDate}`);
           const timeEntryDate = getZonedTime(new Date(timeEntry.start));
+          console.log(`Time Entry date: ${timeEntryDate}`);
           matchingStartTime = compareTimes(existingEntryDate, timeEntryDate);
         }
         if (
@@ -75,6 +76,7 @@ export async function tasksToTimeEntries() {
 
   if (workspaceId) {
     for (const timeEntry of filteredTimeEntries) {
+      console.log(`Filtered time entry: ${JSON.stringify(timeEntry)}`);
       clockifyManager.addTimeEntry(workspaceId, timeEntry);
     }
   }

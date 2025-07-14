@@ -193,6 +193,10 @@ export class ClockifyManager {
         throw new Error(`Failed to fetch time entries: ${response.statusText}`);
       }
       const timeEntries: FetchedTimeEntry[] = await response.json();
+      console.log(
+        "Fetched time entries from Clockify:",
+        JSON.stringify(timeEntries, null, 2)
+      );
       return timeEntries;
     } catch (error) {
       console.error(error);
@@ -207,6 +211,8 @@ export class ClockifyManager {
     // Defines today's date range for fetchTimeEntries()
     const start = formatISO(startOfDay(getZonedTime(new Date())));
     const end = formatISO(endOfDay(getZonedTime(new Date())));
+    console.log(`Start of day: ${start}`);
+    console.log(`End of day: ${end}`);
     const timeEntries = await this.fetchTimeEntries(
       workspaceId,
       userId,
