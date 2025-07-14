@@ -58,10 +58,10 @@ function timeEntriesToTasks() {
         console.log(`Total fetched tasks: ${existingTasks.length}`);
         function filterTodoistDuplicates(existingTasks, timeEntries) {
             const filteredTasks = timeEntries.filter((newTask) => {
-                const newTaskTime = new Date(`${newTask.timeInterval.start}`);
+                const newTaskTime = (0, utility_1.getZonedTime)(new Date(`${newTask.timeInterval.start}`));
                 const matchingTime = existingTasks.find((task) => {
                     var _a;
-                    const taskTime = new Date(`${(_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime}`);
+                    const taskTime = (0, utility_1.getZonedTime)(new Date(`${(_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime}`));
                     // console.log(`${task.content}:${task.due?.datetime}`.bgMagenta);
                     return (0, utility_1.compareTimes)(taskTime, newTaskTime);
                 });

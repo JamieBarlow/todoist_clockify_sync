@@ -118,8 +118,8 @@ class TodoistTaskManager {
         var _a, _b;
         if (task.duration && task.due && task.due.datetime) {
             const duration = (_a = task.duration) === null || _a === void 0 ? void 0 : _a.amount;
-            const startTime = new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`).toISOString();
-            const endTime = new Date(startTime);
+            const startTime = (0, utility_1.getZonedTime)(new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`)).toISOString();
+            const endTime = (0, utility_1.getZonedTime)(new Date(startTime));
             endTime.setMinutes(endTime.getMinutes() + duration);
             const endTimeStr = endTime.toISOString();
             return {

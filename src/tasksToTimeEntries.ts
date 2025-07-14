@@ -1,6 +1,6 @@
 import { TodoistTaskManager, TodoistProjectManager } from "./todoist";
 import { ClockifyManager } from "./clockify";
-import { compareTimes } from "./utility";
+import { compareTimes, getZonedTime } from "./utility";
 
 // Populates Clockify time entries from Todoist tasks (once their time is passed), while avoiding duplicate entries
 export async function tasksToTimeEntries() {
@@ -46,8 +46,10 @@ export async function tasksToTimeEntries() {
       const match = existingTimeEntries.find((existing) => {
         let matchingStartTime;
         if (existing.timeInterval.start) {
-          const existingEntryDate = new Date(existing.timeInterval.start);
-          const timeEntryDate = new Date(timeEntry.start);
+          const existingEntryDate = getZonedTime(
+            new Date(existing.timeInterval.start)
+          );
+          const timeEntryDate = getZonedTime(new Date(timeEntry.start));
           matchingStartTime = compareTimes(existingEntryDate, timeEntryDate);
         }
         if (

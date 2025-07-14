@@ -1,7 +1,7 @@
 import { ClockifyManager, FetchedTimeEntry } from "./clockify";
 import { TodoistProjectManager, TodoistTaskManager } from "./todoist";
 import { Task } from "@doist/todoist-api-typescript";
-import { compareTimes } from "./utility";
+import { compareTimes, getZonedTime } from "./utility";
 
 // Fetches new Clockify time entries and creates matching Todoist tasks (as meetings)
 async function timeEntriesToTasks() {
@@ -57,17 +57,24 @@ async function timeEntriesToTasks() {
     timeEntries: FetchedTimeEntry[]
   ) {
     const filteredTasks = timeEntries.filter((newTask) => {
-      const newTaskTime = new Date(`${newTask.timeInterval.start}`);
+      const newTaskTime = getZonedTime(
+        new Date(`${newTask.timeInterval.start}`)
+      );
       const matchingTime = existingTasks.find((task) => {
-        const taskTime = new Date(`${task.due?.datetime}`);
-        // console.log(`${task.content}:${task.due?.datetime}`.bgMagenta);
+        const taskTime = getZonedTime(new Date(`${task.due?.datetime}`));
+        console.log(
+          `Existing task: ${task.content}:${task.due?.datetime}`.bgMagenta
+        );
         return compareTimes(taskTime, newTaskTime);
       });
       if (matchingTime) {
         console.log(`Duplicate found: ${matchingTime.content}`.bgRed);
         return false;
       } else {
-        console.log(`New task added: ${newTask.timeInterval.start}`.bgGreen);
+        console.log(
+          `New task added: ${newTask.description} ${newTask.timeInterval.start}`
+            .bgGreen
+        );
         return true;
       }
     });

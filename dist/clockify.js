@@ -130,8 +130,8 @@ class ClockifyManager {
     // Useful method for ensuring timeEntriesToTasks script is only populating future entries
     excludePastEntries(timeEntries) {
         return timeEntries.filter((entry) => {
-            const start = new Date(`${entry.timeInterval.start}`);
-            const now = new Date();
+            const start = (0, utility_1.getZonedTime)(new Date(`${entry.timeInterval.start}`));
+            const now = (0, utility_1.getZonedTime)(new Date());
             return (0, utility_1.isAfter)(start, now);
         });
     }

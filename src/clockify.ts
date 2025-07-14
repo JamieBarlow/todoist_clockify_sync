@@ -205,8 +205,8 @@ export class ClockifyManager {
     userId: string
   ): Promise<FetchedTimeEntry[]> {
     // Defines today's date range for fetchTimeEntries()
-    const start = formatISO(startOfDay(new Date()));
-    const end = formatISO(endOfDay(new Date()));
+    const start = formatISO(startOfDay(getZonedTime(new Date())));
+    const end = formatISO(endOfDay(getZonedTime(new Date())));
     const timeEntries = await this.fetchTimeEntries(
       workspaceId,
       userId,
@@ -221,8 +221,8 @@ export class ClockifyManager {
     userId: string
   ): Promise<FetchedTimeEntry[]> {
     // Defines weekly date range for fetchTimeEntries()
-    const start = formatISO(startOfDay(new Date()));
-    const end = formatISO(startOfDay(addDays(new Date(), 5)));
+    const start = formatISO(startOfDay(getZonedTime(new Date())));
+    const end = formatISO(startOfDay(getZonedTime(addDays(new Date(), 5))));
     console.log(`fetchWeeklyTimeEntries start of day: ${start}`);
     const timeEntries = await this.fetchTimeEntries(
       workspaceId,
@@ -236,8 +236,8 @@ export class ClockifyManager {
   // Useful method for ensuring timeEntriesToTasks script is only populating future entries
   excludePastEntries(timeEntries: FetchedTimeEntry[]): FetchedTimeEntry[] {
     return timeEntries.filter((entry) => {
-      const start = new Date(`${entry.timeInterval.start}`);
-      const now = new Date();
+      const start = getZonedTime(new Date(`${entry.timeInterval.start}`));
+      const now = getZonedTime(new Date());
       return isAfter(start, now);
     });
   }

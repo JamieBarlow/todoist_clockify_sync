@@ -53,8 +53,8 @@ function tasksToTimeEntries() {
                     const match = existingTimeEntries.find((existing) => {
                         let matchingStartTime;
                         if (existing.timeInterval.start) {
-                            const existingEntryDate = new Date(existing.timeInterval.start);
-                            const timeEntryDate = new Date(timeEntry.start);
+                            const existingEntryDate = (0, utility_1.getZonedTime)(new Date(existing.timeInterval.start));
+                            const timeEntryDate = (0, utility_1.getZonedTime)(new Date(timeEntry.start));
                             matchingStartTime = (0, utility_1.compareTimes)(existingEntryDate, timeEntryDate);
                         }
                         if (timeEntry.description === existing.description &&

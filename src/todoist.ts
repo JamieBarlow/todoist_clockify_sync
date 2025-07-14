@@ -18,7 +18,7 @@ import {
   Label,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
-import { isAfter } from "./utility";
+import { isAfter, getZonedTime } from "./utility";
 
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
@@ -117,8 +117,10 @@ export class TodoistTaskManager {
   getTaskTiming(task: Task) {
     if (task.duration && task.due && task.due.datetime) {
       const duration = task.duration?.amount;
-      const startTime = new Date(`${task.due?.datetime}`).toISOString();
-      const endTime = new Date(startTime);
+      const startTime = getZonedTime(
+        new Date(`${task.due?.datetime}`)
+      ).toISOString();
+      const endTime = getZonedTime(new Date(startTime));
       endTime.setMinutes(endTime.getMinutes() + duration);
       const endTimeStr = endTime.toISOString();
       return {
@@ -193,9 +195,9 @@ export class TodoistTaskManager {
 
   removeFutureTasks() {
     this.tasks = this.tasks.filter((task) => {
-      const now = new Date();
+      const now = getZonedTime(new Date());
       if (!task.due?.datetime) return true; // Keep tasks without a due date
-      const taskDue = new Date(task.due.datetime);
+      const taskDue = getZonedTime(new Date(task.due.datetime));
       return !isAfter(taskDue, now);
     });
   }
