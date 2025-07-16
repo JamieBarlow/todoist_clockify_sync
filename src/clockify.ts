@@ -1,9 +1,9 @@
 import "dotenv/config";
 import "colors";
 import { StringMappingType } from "typescript";
-import { compareDates, isAfter, getZonedTime } from "./utility";
+import { compareDates, getZonedTime } from "./utility";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
-import { addDays, endOfDay, formatISO, startOfDay } from "date-fns";
+import { addDays, endOfDay, formatISO, startOfDay, isAfter } from "date-fns";
 
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
 
@@ -65,9 +65,9 @@ export interface NewTimeEntry {
     }
   ];
   description: string;
-  end: string;
+  end: Date;
   projectId?: string;
-  start: string;
+  start: Date;
   tagIds?: string[];
   taskId?: string;
   type: "REGULAR" | "BREAK";
@@ -129,12 +129,14 @@ export class ClockifyManager {
     return [];
   }
 
+  // Assumes there is only 1 workspace
   getWorkspaceId(): string {
     if (this.workspaces) {
       return this.workspaces[0].id;
     }
     return "";
   }
+
   async fetchAllProjects(workspaceId: string): Promise<FetchProjectsResponse> {
     try {
       const response = await fetch(
@@ -199,9 +201,8 @@ export class ClockifyManager {
       );
       return timeEntries;
     } catch (error) {
-      console.error(error);
+      throw new Error("Failed to return Clockify time entries");
     }
-    return [];
   }
 
   async fetchTodayTimeEntries(
@@ -209,8 +210,8 @@ export class ClockifyManager {
     userId: string
   ): Promise<FetchedTimeEntry[]> {
     // Defines today's date range for fetchTimeEntries()
-    const start = formatISO(startOfDay(getZonedTime(new Date())));
-    const end = formatISO(endOfDay(getZonedTime(new Date())));
+    const start = new Date().toISOString();
+    const end = endOfDay(new Date()).toISOString();
     console.log(`Start of day: ${start}`);
     console.log(`End of day: ${end}`);
     const timeEntries = await this.fetchTimeEntries(
@@ -328,6 +329,8 @@ export class ClockifyManager {
         );
         return;
       }
+      const result = await response.json();
+      console.log("Time entry successfully added:", result);
       // catch async errors
     } catch (error) {
       console.error(`Error adding time entries: ${error}`.red);

@@ -15,6 +15,7 @@ require("colors");
 const TODOIST_API_KEY = process.env.TODOIST_API_KEY;
 const todoist_api_typescript_1 = require("@doist/todoist-api-typescript");
 const utility_1 = require("./utility");
+const date_fns_1 = require("date-fns");
 if (!TODOIST_API_KEY) {
     throw new Error("Missing TODOIST_API_KEY in environment variables");
 }
@@ -69,13 +70,9 @@ class TodoistProjectManager {
             yield this.fetchProjects();
             const allProjects = this.getAllProjects();
             const projectNames = ids.map((id) => {
-                const project = allProjects.find((p) => p.id === id);
-                if (project) {
-                    return project.name;
-                }
-                else {
-                    return "";
-                }
+                var _a;
+                const name = (_a = allProjects.find((p) => p.id === id)) === null || _a === void 0 ? void 0 : _a.name;
+                return name !== null && name !== void 0 ? name : ""; // use empty string if not found - preserving array length
             });
             return projectNames;
         });
@@ -101,7 +98,7 @@ class TodoistTaskManager {
             }
         });
     }
-    // Getter method to access tasks
+    // Getter method to access tasks once fetched from API
     getTasks() {
         return this.tasks;
     }
@@ -111,20 +108,24 @@ class TodoistTaskManager {
     }
     logTasks() {
         console.log(`Tasks due today: ${this.tasks.length}`.green);
-        this.tasks.forEach((task) => console.log(`${task.content}`.blue));
+        this.tasks.forEach((task) => {
+            var _a, _b;
+            console.log(`Task: ${task.content}`.blue);
+            console.log(`Due date: ${(_a = task.due) === null || _a === void 0 ? void 0 : _a.date}`);
+            console.log(`Due dateTime: ${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`);
+        });
     }
     // Calculates start and end times from the Todoist task's datetime value. Allows for conversion to Clockify tasks
     getTaskTiming(task) {
         var _a, _b;
         if (task.duration && task.due && task.due.datetime) {
             const duration = (_a = task.duration) === null || _a === void 0 ? void 0 : _a.amount;
-            const startTime = (0, utility_1.getZonedTime)(new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`)).toISOString();
-            const endTime = (0, utility_1.getZonedTime)(new Date(startTime));
+            const startTime = new Date(`${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`);
+            const endTime = new Date(startTime);
             endTime.setMinutes(endTime.getMinutes() + duration);
-            const endTimeStr = endTime.toISOString();
             return {
                 startTime: startTime,
-                endTime: endTimeStr,
+                endTime: endTime,
             };
         }
         else {
@@ -164,6 +165,8 @@ class TodoistTaskManager {
         for (let i = 0; i < this.tasks.length; i++) {
             const task = this.tasks[i];
             const { startTime, endTime } = this.getTaskTiming(task);
+            console.log(`Task Start time: ${task.content} ${startTime} Local London time: ${startTime ? (0, utility_1.getZonedTime)(startTime) : ""}`);
+            console.log(`Task End time: ${task.content} ${endTime} Local London time: ${endTime ? (0, utility_1.getZonedTime)(endTime) : ""}`);
             if (startTime && endTime) {
                 timeEntries.push({
                     billable: false,
@@ -175,17 +178,17 @@ class TodoistTaskManager {
                 });
             }
         }
-        console.log(`Time entries: ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta);
+        console.log(`Clockify time entries (before de-duplicating): ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta);
         return timeEntries;
     }
-    removeFutureTasks() {
+    filterFutureTasks() {
         this.tasks = this.tasks.filter((task) => {
             var _a;
             const now = new Date();
             if (!((_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime))
                 return true; // Keep tasks without a due date
             const taskDue = new Date(task.due.datetime);
-            return !(0, utility_1.isAfter)(taskDue, now);
+            return (0, date_fns_1.isBefore)(taskDue, now);
         });
     }
     closeTask(task) {

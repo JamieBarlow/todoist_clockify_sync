@@ -18,11 +18,6 @@ export const compareTimes = (d1: Date, d2: Date): boolean => {
   return d1.getTime() === d2.getTime() ? true : false;
 };
 
-// Compares 2 dates/times, if d1 is later than d2 this will return true
-export const isAfter = (d1: Date, d2: Date): boolean => {
-  return d1.getTime() > d2.getTime() ? true : false;
-};
-
 export const getZonedTime = (date: Date): Date => {
   const timeZone = "Europe/London";
   const zonedTime = toZonedTime(date, timeZone);

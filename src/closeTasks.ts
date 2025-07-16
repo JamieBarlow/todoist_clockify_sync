@@ -13,7 +13,7 @@ async function closeTasks(syncTimeEntries = false) {
     await todoistTaskManager.fetchTasks(
       "today & (!#Habits & !#Subscriptions & @Done & !(no time) | /Meetings)"
     );
-    todoistTaskManager.removeFutureTasks();
+    todoistTaskManager.filterFutureTasks();
     const tasks = todoistTaskManager.getTasks();
     tasks.forEach((task) => {
       // Remove 'Done' label to account for recurring tasks

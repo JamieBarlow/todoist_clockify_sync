@@ -16,34 +16,28 @@ const utility_1 = require("./utility");
 // Populates Clockify time entries from Todoist tasks (once their time is passed), while avoiding duplicate entries
 function tasksToTimeEntries() {
     return __awaiter(this, void 0, void 0, function* () {
+        // Fetch list of Todoist tasks whose time has elapsed
         const todoistTaskManager = new todoist_1.TodoistTaskManager();
         const todoistProjectManager = new todoist_1.TodoistProjectManager();
-        // Fetch Todoist tasks, then their associated project ids and project names. Excludes items in Habits or Subscriptions projects, since these are not scheduled tasks
         yield todoistTaskManager.fetchTasks("today & !#Habits & !#Subscriptions");
-        todoistTaskManager.removeFutureTasks();
+        todoistTaskManager.filterFutureTasks();
         todoistTaskManager.logTasks();
+        // Get all project ids and names for fetched Todoist tasks
         const todoistProjectIds = todoistTaskManager.getTaskProjectIds();
         const todoistProjectNames = yield todoistProjectManager.getTaskProjectNames(todoistProjectIds);
-        // Fetch Clockify workspaces, and use id of workspace (assuming there is only 1) to fetch all projects (names and ids)
+        // Match each Todoist task with a Clockify project (if found)
         const clockifyManager = new clockify_1.ClockifyManager();
         yield clockifyManager.fetchClockifyWorkspaces();
         const workspaceId = clockifyManager.getWorkspaceId();
         const clockifyProjects = yield clockifyManager.fetchAllProjects(workspaceId);
-        // Check project name of each Todoist task against Clockify project names, and return the Clockify project id if they match
         const projectIds = todoistProjectNames.map((projectName) => {
-            const projectMatch = clockifyProjects.find((p) => {
-                return p.name === projectName;
-            });
-            if (projectMatch) {
-                console.log(`Match!! ${projectMatch.id}`);
-                return projectMatch.id;
-            }
-            else {
-                return "";
-            }
+            var _a;
+            const match = clockifyProjects.find((p) => p.name === projectName);
+            return (_a = match === null || match === void 0 ? void 0 : match.id) !== null && _a !== void 0 ? _a : "";
         });
+        // Convert tasks to Clockify time entries
         const timeEntries = todoistTaskManager.formatTasksForClockify(projectIds);
-        // Filter out duplicate entries (i.e. any time entries already present in Clockify)
+        // Filter out duplicate (pre-existing) Clockify entries
         function filterClockifyDuplicates() {
             return __awaiter(this, void 0, void 0, function* () {
                 const userId = yield clockifyManager.fetchUserId(workspaceId);
@@ -51,26 +45,25 @@ function tasksToTimeEntries() {
                 const filtered = timeEntries.filter((timeEntry) => {
                     // Check for matching item name AND start time (same name may reoccur throughout day)
                     const match = existingTimeEntries.find((existing) => {
-                        let matchingStartTime;
+                        let matchingStartTime = false;
                         if (existing.timeInterval.start) {
-                            const existingEntryDate = (0, utility_1.getZonedTime)(new Date(existing.timeInterval.start));
-                            const timeEntryDate = (0, utility_1.getZonedTime)(new Date(timeEntry.start));
+                            const existingEntryDate = new Date(existing.timeInterval.start);
+                            console.log(`Existing entry date: ${existingEntryDate}`);
+                            const timeEntryDate = new Date(timeEntry.start);
+                            console.log(`Time Entry date: ${timeEntryDate}`);
                             matchingStartTime = (0, utility_1.compareTimes)(existingEntryDate, timeEntryDate);
                         }
-                        if (timeEntry.description === existing.description &&
-                            matchingStartTime) {
-                            return true;
-                        }
-                        else {
-                            return false;
-                        }
+                        return timeEntry.description === existing.description &&
+                            matchingStartTime
+                            ? true
+                            : false;
                     });
                     if (match) {
                         console.log(`Duplicate found: ${timeEntry.description}`.bgRed);
                         return false;
                     }
                     else {
-                        console.log(`New time entry added: ${timeEntry.description}`.bgGreen);
+                        console.log(`New time entry added: ${timeEntry.start}`.bgGreen);
                         return true;
                     }
                 });

@@ -4,36 +4,33 @@ import { compareTimes, getZonedTime } from "./utility";
 
 // Populates Clockify time entries from Todoist tasks (once their time is passed), while avoiding duplicate entries
 export async function tasksToTimeEntries() {
+  // Fetch list of Todoist tasks whose time has elapsed
   const todoistTaskManager = new TodoistTaskManager();
   const todoistProjectManager = new TodoistProjectManager();
-  // Fetch Todoist tasks, then their associated project ids and project names. Excludes items in Habits or Subscriptions projects, since these are not scheduled tasks
   await todoistTaskManager.fetchTasks("today & !#Habits & !#Subscriptions");
-  todoistTaskManager.removeFutureTasks();
+  todoistTaskManager.filterFutureTasks();
   todoistTaskManager.logTasks();
+
+  // Get all project ids and names for fetched Todoist tasks
   const todoistProjectIds = todoistTaskManager.getTaskProjectIds();
   const todoistProjectNames = await todoistProjectManager.getTaskProjectNames(
     todoistProjectIds
   );
-  // Fetch Clockify workspaces, and use id of workspace (assuming there is only 1) to fetch all projects (names and ids)
+
+  // Match each Todoist task with a Clockify project (if found)
   const clockifyManager = new ClockifyManager();
   await clockifyManager.fetchClockifyWorkspaces();
   const workspaceId = clockifyManager.getWorkspaceId();
   const clockifyProjects = await clockifyManager.fetchAllProjects(workspaceId);
-  // Check project name of each Todoist task against Clockify project names, and return the Clockify project id if they match
   const projectIds = todoistProjectNames.map((projectName) => {
-    const projectMatch = clockifyProjects.find((p) => {
-      return p.name === projectName;
-    });
-    if (projectMatch) {
-      return projectMatch.id;
-    } else {
-      return "";
-    }
+    const match = clockifyProjects.find((p) => p.name === projectName);
+    return match?.id ?? "";
   });
 
+  // Convert tasks to Clockify time entries
   const timeEntries = todoistTaskManager.formatTasksForClockify(projectIds);
 
-  // Filter out duplicate entries (i.e. any time entries already present in Clockify)
+  // Filter out duplicate (pre-existing) Clockify entries
   async function filterClockifyDuplicates() {
     const userId = await clockifyManager.fetchUserId(workspaceId);
     const existingTimeEntries = await clockifyManager.fetchTodayTimeEntries(
@@ -43,30 +40,24 @@ export async function tasksToTimeEntries() {
     const filtered = timeEntries.filter((timeEntry) => {
       // Check for matching item name AND start time (same name may reoccur throughout day)
       const match = existingTimeEntries.find((existing) => {
-        let matchingStartTime;
+        let matchingStartTime = false;
         if (existing.timeInterval.start) {
-          const existingEntryDate = getZonedTime(
-            new Date(existing.timeInterval.start)
-          );
+          const existingEntryDate = new Date(existing.timeInterval.start);
           console.log(`Existing entry date: ${existingEntryDate}`);
-          const timeEntryDate = getZonedTime(new Date(timeEntry.start));
+          const timeEntryDate = new Date(timeEntry.start);
           console.log(`Time Entry date: ${timeEntryDate}`);
           matchingStartTime = compareTimes(existingEntryDate, timeEntryDate);
         }
-        if (
-          timeEntry.description === existing.description &&
+        return timeEntry.description === existing.description &&
           matchingStartTime
-        ) {
-          return true;
-        } else {
-          return false;
-        }
+          ? true
+          : false;
       });
       if (match) {
         console.log(`Duplicate found: ${timeEntry.description}`.bgRed);
         return false;
       } else {
-        console.log(`New time entry added: ${timeEntry.description}`.bgGreen);
+        console.log(`New time entry added: ${timeEntry.start}`.bgGreen);
         return true;
       }
     });
@@ -76,7 +67,6 @@ export async function tasksToTimeEntries() {
 
   if (workspaceId) {
     for (const timeEntry of filteredTimeEntries) {
-      console.log(`Filtered time entry: ${JSON.stringify(timeEntry)}`);
       clockifyManager.addTimeEntry(workspaceId, timeEntry);
     }
   }

@@ -4,13 +4,28 @@
 			"path": "src/clockify.ts",
 			"bookmarks": [
 				{
-					"line": 231,
+					"line": 232,
 					"column": 11,
 					"label": ""
 				},
 				{
-					"line": 262,
+					"line": 263,
 					"column": 25,
+					"label": ""
+				}
+			]
+		},
+		{
+			"path": "src/todoist.ts",
+			"bookmarks": [
+				{
+					"line": 117,
+					"column": 2,
+					"label": ""
+				},
+				{
+					"line": 175,
+					"column": 41,
 					"label": ""
 				}
 			]

@@ -18,7 +18,8 @@ import {
   Label,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
-import { isAfter, getZonedTime } from "./utility";
+import { getZonedTime } from "./utility";
+import { formatISO, isBefore } from "date-fns";
 
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");
@@ -73,12 +74,8 @@ export class TodoistProjectManager {
     await this.fetchProjects();
     const allProjects = this.getAllProjects();
     const projectNames = ids.map((id) => {
-      const project = allProjects.find((p) => p.id === id);
-      if (project) {
-        return project.name;
-      } else {
-        return "";
-      }
+      const name = allProjects.find((p) => p.id === id)?.name;
+      return name ?? ""; // use empty string if not found - preserving array length
     });
     return projectNames;
   }
@@ -99,7 +96,7 @@ export class TodoistTaskManager {
       throw error;
     }
   }
-  // Getter method to access tasks
+  // Getter method to access tasks once fetched from API
   getTasks(): Task[] {
     return this.tasks;
   }
@@ -112,7 +109,8 @@ export class TodoistTaskManager {
     console.log(`Tasks due today: ${this.tasks.length}`.green);
     this.tasks.forEach((task) => {
       console.log(`Task: ${task.content}`.blue);
-      console.log(`Due: ${task.due}`);
+      console.log(`Due date: ${task.due?.date}`);
+      console.log(`Due dateTime: ${task.due?.datetime}`);
     });
   }
 
@@ -120,15 +118,12 @@ export class TodoistTaskManager {
   getTaskTiming(task: Task) {
     if (task.duration && task.due && task.due.datetime) {
       const duration = task.duration?.amount;
-      const startTime = getZonedTime(
-        new Date(`${task.due?.datetime}`)
-      ).toISOString();
-      const endTime = getZonedTime(new Date(startTime));
+      const startTime = new Date(`${task.due?.datetime}`);
+      const endTime = new Date(startTime);
       endTime.setMinutes(endTime.getMinutes() + duration);
-      const endTimeStr = endTime.toISOString();
       return {
         startTime: startTime,
-        endTime: endTimeStr,
+        endTime: endTime,
       };
     } else {
       return {
@@ -179,8 +174,16 @@ export class TodoistTaskManager {
     for (let i = 0; i < this.tasks.length; i++) {
       const task = this.tasks[i];
       const { startTime, endTime } = this.getTaskTiming(task);
-      console.log(`Task Start time: ${task.content} ${startTime}`);
-      console.log(`Task End time: ${task.content} ${endTime}`);
+      console.log(
+        `Task Start time: ${task.content} ${startTime} Local London time: ${
+          startTime ? getZonedTime(startTime) : ""
+        }`
+      );
+      console.log(
+        `Task End time: ${task.content} ${endTime} Local London time: ${
+          endTime ? getZonedTime(endTime) : ""
+        }`
+      );
       if (startTime && endTime) {
         timeEntries.push({
           billable: false,
@@ -192,16 +195,22 @@ export class TodoistTaskManager {
         });
       }
     }
-    console.log(`Tasks: ${JSON.stringify(timeEntries, null, 2)}`.bgMagenta);
+    console.log(
+      `Clockify time entries (before de-duplicating): ${JSON.stringify(
+        timeEntries,
+        null,
+        2
+      )}`.bgMagenta
+    );
     return timeEntries;
   }
 
-  removeFutureTasks() {
+  filterFutureTasks() {
     this.tasks = this.tasks.filter((task) => {
-      const now = getZonedTime(new Date());
+      const now = new Date();
       if (!task.due?.datetime) return true; // Keep tasks without a due date
-      const taskDue = getZonedTime(new Date(task.due.datetime));
-      return !isAfter(taskDue, now);
+      const taskDue = new Date(task.due.datetime);
+      return isBefore(taskDue, now);
     });
   }
 

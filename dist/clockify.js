@@ -43,6 +43,7 @@ class ClockifyManager {
             return [];
         });
     }
+    // Assumes there is only 1 workspace
     getWorkspaceId() {
         if (this.workspaces) {
             return this.workspaces[0].id;
@@ -100,19 +101,21 @@ class ClockifyManager {
                     throw new Error(`Failed to fetch time entries: ${response.statusText}`);
                 }
                 const timeEntries = yield response.json();
+                console.log("Fetched time entries from Clockify:", JSON.stringify(timeEntries, null, 2));
                 return timeEntries;
             }
             catch (error) {
-                console.error(error);
+                throw new Error("Failed to return Clockify time entries");
             }
-            return [];
         });
     }
     fetchTodayTimeEntries(workspaceId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             // Defines today's date range for fetchTimeEntries()
-            const start = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)(new Date()));
-            const end = (0, date_fns_1.formatISO)((0, date_fns_1.endOfDay)(new Date()));
+            const start = new Date().toISOString();
+            const end = (0, date_fns_1.endOfDay)(new Date()).toISOString();
+            console.log(`Start of day: ${start}`);
+            console.log(`End of day: ${end}`);
             const timeEntries = yield this.fetchTimeEntries(workspaceId, userId, start, end);
             return timeEntries;
         });
@@ -120,8 +123,8 @@ class ClockifyManager {
     fetchWeeklyTimeEntries(workspaceId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             // Defines weekly date range for fetchTimeEntries()
-            const start = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)(new Date()));
-            const end = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)((0, date_fns_1.addDays)(new Date(), 5)));
+            const start = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)((0, utility_1.getZonedTime)(new Date())));
+            const end = (0, date_fns_1.formatISO)((0, date_fns_1.startOfDay)((0, utility_1.getZonedTime)((0, date_fns_1.addDays)(new Date(), 5))));
             console.log(`fetchWeeklyTimeEntries start of day: ${start}`);
             const timeEntries = yield this.fetchTimeEntries(workspaceId, userId, start, end);
             return timeEntries;
@@ -132,7 +135,7 @@ class ClockifyManager {
         return timeEntries.filter((entry) => {
             const start = (0, utility_1.getZonedTime)(new Date(`${entry.timeInterval.start}`));
             const now = (0, utility_1.getZonedTime)(new Date());
-            return (0, utility_1.isAfter)(start, now);
+            return (0, date_fns_1.isAfter)(start, now);
         });
     }
     // Takes in fetched Clockify time entries and formats for Todoist tasks
@@ -197,6 +200,8 @@ class ClockifyManager {
                     console.error(`Failed to add time entry: ${response.statusText}, payload: ${JSON.stringify(payload, null, 2)}`.red);
                     return;
                 }
+                const result = yield response.json();
+                console.log("Time entry successfully added:", result);
                 // catch async errors
             }
             catch (error) {

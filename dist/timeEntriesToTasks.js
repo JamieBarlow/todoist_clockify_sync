@@ -60,9 +60,9 @@ function timeEntriesToTasks() {
             const filteredTasks = timeEntries.filter((newTask) => {
                 const newTaskTime = (0, utility_1.getZonedTime)(new Date(`${newTask.timeInterval.start}`));
                 const matchingTime = existingTasks.find((task) => {
-                    var _a;
+                    var _a, _b;
                     const taskTime = (0, utility_1.getZonedTime)(new Date(`${(_a = task.due) === null || _a === void 0 ? void 0 : _a.datetime}`));
-                    // console.log(`${task.content}:${task.due?.datetime}`.bgMagenta);
+                    console.log(`Existing task: ${task.content}:${(_b = task.due) === null || _b === void 0 ? void 0 : _b.datetime}`.bgMagenta);
                     return (0, utility_1.compareTimes)(taskTime, newTaskTime);
                 });
                 if (matchingTime) {
@@ -70,7 +70,8 @@ function timeEntriesToTasks() {
                     return false;
                 }
                 else {
-                    console.log(`New task added: ${newTask.timeInterval.start}`.bgGreen);
+                    console.log(`New task added: ${newTask.description} ${newTask.timeInterval.start}`
+                        .bgGreen);
                     return true;
                 }
             });
