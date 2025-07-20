@@ -24,8 +24,13 @@ export const getZonedTime = (date: Date | string | number): Date => {
   return zonedTime;
 };
 
-export const getUtcTime = (localDate: Date | string | number): Date => {
-  const timeZone = "Europe/London";
-  const utcTime = fromZonedTime(localDate, timeZone);
-  return utcTime;
+export const getUtcTime = (input: Date | string): Date => {
+  if (input instanceof Date) return input;
+  const isUtc = input.endsWith("Z");
+  if (isUtc) {
+    return new Date(input);
+  } else {
+    const timeZone = "Europe/London";
+    return fromZonedTime(input, timeZone);
+  }
 };
