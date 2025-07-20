@@ -47,7 +47,7 @@ export async function tasksToTimeEntries() {
           );
           const timeEntryDate = new Date(newTimeEntry.start);
           console.log(
-            `New time Entry date: ${timeEntryDate} ${newTimeEntry.description}`
+            `New time entry date: ${timeEntryDate} ${newTimeEntry.description}`
           );
           matchingStartTime = compareTimes(existingEntryDate, timeEntryDate);
         }

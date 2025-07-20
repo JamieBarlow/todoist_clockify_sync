@@ -18,7 +18,7 @@ import {
   Label,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
-import { getZonedTime } from "./utility";
+import { getZonedTime, getUtcTime } from "./utility";
 import { formatISO, isBefore } from "date-fns";
 
 if (!TODOIST_API_KEY) {
@@ -118,7 +118,7 @@ export class TodoistTaskManager {
   getTaskTiming(task: Task) {
     if (task.duration && task.due && task.due.datetime) {
       const duration = task.duration?.amount;
-      const startTime = new Date(`${task.due?.datetime}`);
+      const startTime = getUtcTime(task.due?.datetime); // Todoist API does not always return UTC time
       const endTime = new Date(startTime);
       endTime.setMinutes(endTime.getMinutes() + duration);
       return {

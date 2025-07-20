@@ -18,13 +18,13 @@ export const compareTimes = (d1: Date, d2: Date): boolean => {
   return d1.getTime() === d2.getTime() ? true : false;
 };
 
-export const getZonedTime = (date: Date): Date => {
+export const getZonedTime = (date: Date | string | number): Date => {
   const timeZone = "Europe/London";
   const zonedTime = toZonedTime(date, timeZone);
   return zonedTime;
 };
 
-export const getUtcTime = (localDate: Date): Date => {
+export const getUtcTime = (localDate: Date | string | number): Date => {
   const timeZone = "Europe/London";
   const utcTime = fromZonedTime(localDate, timeZone);
   return utcTime;
