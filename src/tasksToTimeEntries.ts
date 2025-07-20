@@ -28,7 +28,7 @@ export async function tasksToTimeEntries() {
   });
 
   // Convert tasks to Clockify time entries
-  const timeEntries = todoistTaskManager.formatTasksForClockify(projectIds);
+  const newtimeEntries = todoistTaskManager.formatTasksForClockify(projectIds);
 
   // Filter out duplicate (pre-existing) Clockify entries
   async function filterClockifyDuplicates() {
@@ -37,27 +37,30 @@ export async function tasksToTimeEntries() {
       workspaceId,
       userId
     );
-    const filtered = timeEntries.filter((timeEntry) => {
-      // Check for matching item name AND start time (same name may reoccur throughout day)
+    const filtered = newtimeEntries.filter((newTimeEntry) => {
       const match = existingTimeEntries.find((existing) => {
         let matchingStartTime = false;
         if (existing.timeInterval.start) {
           const existingEntryDate = new Date(existing.timeInterval.start);
-          console.log(`Existing entry date: ${existingEntryDate}`);
-          const timeEntryDate = new Date(timeEntry.start);
-          console.log(`Time Entry date: ${timeEntryDate}`);
+          console.log(
+            `Existing entry date: ${existingEntryDate} ${existing.description}`
+          );
+          const timeEntryDate = new Date(newTimeEntry.start);
+          console.log(
+            `New time Entry date: ${timeEntryDate} ${newTimeEntry.description}`
+          );
           matchingStartTime = compareTimes(existingEntryDate, timeEntryDate);
         }
-        return timeEntry.description === existing.description &&
+        return newTimeEntry.description === existing.description &&
           matchingStartTime
           ? true
           : false;
       });
       if (match) {
-        console.log(`Duplicate found: ${timeEntry.description}`.bgRed);
+        console.log(`Duplicate found: ${newTimeEntry.description}`.bgRed);
         return false;
       } else {
-        console.log(`New time entry added: ${timeEntry.start}`.bgGreen);
+        console.log(`New time entry added: ${newTimeEntry.start}`.bgGreen);
         return true;
       }
     });

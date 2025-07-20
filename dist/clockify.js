@@ -112,8 +112,9 @@ class ClockifyManager {
     fetchTodayTimeEntries(workspaceId, userId) {
         return __awaiter(this, void 0, void 0, function* () {
             // Defines today's date range for fetchTimeEntries()
-            const start = new Date().toISOString();
-            const end = (0, date_fns_1.endOfDay)(new Date()).toISOString();
+            const now = new Date();
+            const start = (0, date_fns_1.startOfDay)(now).toISOString();
+            const end = (0, date_fns_1.endOfDay)(now).toISOString();
             console.log(`Start of day: ${start}`);
             console.log(`End of day: ${end}`);
             const timeEntries = yield this.fetchTimeEntries(workspaceId, userId, start, end);

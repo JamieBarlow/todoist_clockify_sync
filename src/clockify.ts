@@ -210,8 +210,9 @@ export class ClockifyManager {
     userId: string
   ): Promise<FetchedTimeEntry[]> {
     // Defines today's date range for fetchTimeEntries()
-    const start = new Date().toISOString();
-    const end = endOfDay(new Date()).toISOString();
+    const now = new Date();
+    const start = startOfDay(now).toISOString();
+    const end = endOfDay(now).toISOString();
     console.log(`Start of day: ${start}`);
     console.log(`End of day: ${end}`);
     const timeEntries = await this.fetchTimeEntries(
