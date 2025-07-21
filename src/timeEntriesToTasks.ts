@@ -62,7 +62,10 @@ async function timeEntriesToTasks() {
     const filteredTasks = timeEntries.filter((newTask) => {
       const newTaskTime = getUtcTime(`${newTask.timeInterval.start}`);
       const matchingTime = existingTasks.find((task) => {
-        const taskTime = getUtcTime(`${task.due?.datetime}`);
+        const taskTime = getUtcTime(
+          `${task.due?.datetime}`,
+          task.due?.timezone
+        );
         console.log(`Existing task: ${task.content}:${taskTime}`.bgMagenta);
         return compareTimes(taskTime, newTaskTime);
       });

@@ -120,7 +120,7 @@ export class TodoistTaskManager {
   getTaskTiming(task: Task) {
     if (task.duration && task.due && task.due.datetime) {
       const duration = task.duration?.amount;
-      const startTime = getUtcTime(task.due?.datetime); // Todoist API does not always return UTC time
+      const startTime = getUtcTime(task.due?.datetime, task.due?.timezone); // Todoist API does not always return UTC time
       const endTime = new Date(startTime);
       endTime.setMinutes(endTime.getMinutes() + duration);
       return {
@@ -211,7 +211,7 @@ export class TodoistTaskManager {
     this.tasks = this.tasks.filter((task) => {
       const now = new Date();
       if (!task.due?.datetime) return true; // Keep tasks without a due date
-      const taskDue = getUtcTime(task.due.datetime);
+      const taskDue = getUtcTime(task.due.datetime, task.due.timezone);
       return isBefore(taskDue, now);
     });
   }

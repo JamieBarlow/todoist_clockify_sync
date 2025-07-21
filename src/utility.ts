@@ -25,14 +25,17 @@ export const getZonedTime = (date: Date | string | number): Date => {
 };
 
 // Useful default for creating dates using a string. Handles conversion of non-UTC strings to UTC, or keeping UTC strings intact (can safely be used on UTC strings without double-conversion)
-export const getUtcTime = (input: Date | string): Date => {
+export const getUtcTime = (
+  input: Date | string,
+  timezone?: string | null | undefined
+): Date => {
   if (input instanceof Date) return input;
   const isUtc = input.endsWith("Z");
   if (isUtc) {
     return new Date(input);
   } else {
-    const timeZone = "Europe/London";
-    return fromZonedTime(input, timeZone);
+    timezone ||= "Europe/London";
+    return fromZonedTime(input, timezone);
   }
 };
 
