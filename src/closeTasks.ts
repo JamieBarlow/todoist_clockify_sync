@@ -1,6 +1,8 @@
 import { TodoistTaskManager } from "./todoist";
 import { tasksToTimeEntries } from "./tasksToTimeEntries";
+import { logger } from "./utility";
 
+logger();
 // Close all scheduled tasks with a 'Done' tag which are in the past. Also close any items from Work Admin /Meetings section which are in the past, even if no 'Done' label is present
 async function closeTasks(syncTimeEntries = false) {
   try {

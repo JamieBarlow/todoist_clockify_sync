@@ -1,6 +1,8 @@
 import { TodoistTaskManager, TodoistProjectManager } from "./todoist";
 import { ClockifyManager } from "./clockify";
-import { compareTimes, getZonedTime } from "./utility";
+import { compareTimes, logger } from "./utility";
+
+logger();
 
 // Populates Clockify time entries from Todoist tasks (once their time is passed), while avoiding duplicate entries
 export async function tasksToTimeEntries() {

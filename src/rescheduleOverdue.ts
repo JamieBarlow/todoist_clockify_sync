@@ -1,4 +1,7 @@
 import { TodoistTaskManager } from "./todoist";
+import { logger } from "./utility";
+
+logger();
 
 // Reschedules overdue Todoist tasks to today's date (without a start time). Note: handles daily recurring tasks but currently excludes weekly items since these will need rescheduling to a future week
 async function rescheduleOverdue() {

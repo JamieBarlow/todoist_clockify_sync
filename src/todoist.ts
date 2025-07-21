@@ -18,8 +18,10 @@ import {
   Label,
 } from "@doist/todoist-api-typescript";
 import { NewTimeEntry } from "./clockify";
-import { getZonedTime, getUtcTime } from "./utility";
+import { getZonedTime, getUtcTime, logger } from "./utility";
 import { formatISO, isBefore } from "date-fns";
+
+logger();
 
 if (!TODOIST_API_KEY) {
   throw new Error("Missing TODOIST_API_KEY in environment variables");

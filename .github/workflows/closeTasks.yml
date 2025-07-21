@@ -20,3 +20,4 @@ jobs:
         env:
           TODOIST_API_KEY: ${{ secrets.TODOIST_API_KEY }}
           CLOCKIFY_API_KEY: ${{ secrets.CLOCKIFY_API_KEY }}
+          LOG_LEVEL: silent

@@ -1,11 +1,12 @@
 import "dotenv/config";
 import "colors";
 import { StringMappingType } from "typescript";
-import { compareDates, getZonedTime, getUtcTime } from "./utility";
+import { compareDates, getZonedTime, getUtcTime, logger } from "./utility";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 import { addDays, endOfDay, formatISO, startOfDay, isAfter } from "date-fns";
 
 const CLOCKIFY_API_KEY = process.env.CLOCKIFY_API_KEY;
+logger();
 
 interface ClockifyWorkspace {
   costRate: {};

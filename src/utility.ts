@@ -35,3 +35,12 @@ export const getUtcTime = (input: Date | string): Date => {
     return fromZonedTime(input, timeZone);
   }
 };
+
+// Silent logging dependent on environment (use in combo with GitHub workflow actions)
+export const logger = () => {
+  if (process.env.LOG_LEVEL === "silent") {
+    console.log = () => {};
+    console.error = () => {};
+    console.warn = () => {};
+  }
+};

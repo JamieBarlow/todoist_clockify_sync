@@ -1,7 +1,9 @@
 import { ClockifyManager, FetchedTimeEntry } from "./clockify";
 import { TodoistProjectManager, TodoistTaskManager } from "./todoist";
 import { Task } from "@doist/todoist-api-typescript";
-import { compareTimes, getUtcTime } from "./utility";
+import { compareTimes, getUtcTime, logger } from "./utility";
+
+logger();
 
 // Fetches new Clockify time entries and creates matching Todoist tasks (as meetings)
 async function timeEntriesToTasks() {
