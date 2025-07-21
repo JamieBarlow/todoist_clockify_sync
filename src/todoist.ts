@@ -209,7 +209,7 @@ export class TodoistTaskManager {
     this.tasks = this.tasks.filter((task) => {
       const now = new Date();
       if (!task.due?.datetime) return true; // Keep tasks without a due date
-      const taskDue = new Date(task.due.datetime);
+      const taskDue = getUtcTime(task.due.datetime);
       return isBefore(taskDue, now);
     });
   }

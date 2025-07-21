@@ -1,7 +1,7 @@
 import "dotenv/config";
 import "colors";
 import { StringMappingType } from "typescript";
-import { compareDates, getZonedTime } from "./utility";
+import { compareDates, getZonedTime, getUtcTime } from "./utility";
 import { AddTaskArgs } from "@doist/todoist-api-typescript";
 import { addDays, endOfDay, formatISO, startOfDay, isAfter } from "date-fns";
 
@@ -244,8 +244,8 @@ export class ClockifyManager {
   // Useful method for ensuring timeEntriesToTasks script is only populating future entries
   excludePastEntries(timeEntries: FetchedTimeEntry[]): FetchedTimeEntry[] {
     return timeEntries.filter((entry) => {
-      const start = getZonedTime(new Date(`${entry.timeInterval.start}`));
-      const now = getZonedTime(new Date());
+      const start = getUtcTime(`${entry.timeInterval.start}`);
+      const now = new Date();
       return isAfter(start, now);
     });
   }

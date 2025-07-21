@@ -24,6 +24,7 @@ export const getZonedTime = (date: Date | string | number): Date => {
   return zonedTime;
 };
 
+// Useful default for creating dates using a string. Handles conversion of non-UTC strings to UTC, or keeping UTC strings intact (can safely be used on UTC strings without double-conversion)
 export const getUtcTime = (input: Date | string): Date => {
   if (input instanceof Date) return input;
   const isUtc = input.endsWith("Z");

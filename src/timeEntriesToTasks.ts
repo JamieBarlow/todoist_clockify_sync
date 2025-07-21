@@ -1,7 +1,7 @@
 import { ClockifyManager, FetchedTimeEntry } from "./clockify";
 import { TodoistProjectManager, TodoistTaskManager } from "./todoist";
 import { Task } from "@doist/todoist-api-typescript";
-import { compareTimes, getZonedTime } from "./utility";
+import { compareTimes, getUtcTime } from "./utility";
 
 // Fetches new Clockify time entries and creates matching Todoist tasks (as meetings)
 async function timeEntriesToTasks() {
@@ -15,12 +15,14 @@ async function timeEntriesToTasks() {
     userId
   );
   timeEntries = clockifyManager.excludePastEntries(timeEntries); // Avoids re-posting items to Todoist that have already been synced from Todoist -> Clockify
-  const todoistProjectManager = new TodoistProjectManager();
-  const projects = await todoistProjectManager.fetchProjects();
-  const workAdminProject = projects.results.find((project) => {
-    return project.name === "Work Admin";
-  });
+
+  // Fetch ids for specific projects
   const fetchIds = async () => {
+    const todoistProjectManager = new TodoistProjectManager();
+    const projects = await todoistProjectManager.fetchProjects();
+    const workAdminProject = projects.results.find((project) => {
+      return project.name === "Work Admin";
+    });
     const workAdminProjectId = workAdminProject?.id;
     let meetingsSectionId;
     if (workAdminProjectId) {
@@ -46,7 +48,6 @@ async function timeEntriesToTasks() {
     const filter = `${exclusions.join(" & ")} & ${day}`;
     await todoistTaskManager.fetchTasks(filter);
     existingTasks = existingTasks.concat(todoistTaskManager.getTasks());
-
     // Add the day to exclusions for the next iteration
     exclusions.push(`!${day}`);
   }
@@ -57,14 +58,10 @@ async function timeEntriesToTasks() {
     timeEntries: FetchedTimeEntry[]
   ) {
     const filteredTasks = timeEntries.filter((newTask) => {
-      const newTaskTime = getZonedTime(
-        new Date(`${newTask.timeInterval.start}`)
-      );
+      const newTaskTime = getUtcTime(`${newTask.timeInterval.start}`);
       const matchingTime = existingTasks.find((task) => {
-        const taskTime = getZonedTime(new Date(`${task.due?.datetime}`));
-        console.log(
-          `Existing task: ${task.content}:${task.due?.datetime}`.bgMagenta
-        );
+        const taskTime = getUtcTime(`${task.due?.datetime}`);
+        console.log(`Existing task: ${task.content}:${taskTime}`.bgMagenta);
         return compareTimes(taskTime, newTaskTime);
       });
       if (matchingTime) {
